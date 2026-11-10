@@ -14,319 +14,68 @@
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: var(--font-family);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
+        body { background-color: #fff; color: var(--text-primary); min-height: 100vh; display: flex; overflow: hidden; }
 
-        body {
-            background-color: #fff;
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            overflow: hidden; 
-        }
+        /* --- PC Layout --- */
+        .desktop-layout { display: flex; width: 100vw; height: 100vh; }
+        
+        .sidebar { width: 30vw; min-width: 320px; background: var(--brand-bg); background-attachment: fixed; padding: 56px 48px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
+        .btn-volver { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 32px; opacity: 0.9; }
+        .sidebar-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+        .sidebar-amount { font-size: 32px; font-weight: 500; }
+        .summary-section { margin-top: 32px; flex: 1; }
+        .summary-header { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.6; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.3); margin-bottom: 16px; }
+        .summary-item { display: flex; align-items: center; gap: 16px; }
+        .summary-item img { width: 90px; height: 40px; object-fit: contain; background: #fff; border-radius: 4px; padding: 4px; }
+        .summary-item-info { flex: 1; font-size: 14px; font-weight: 500; }
+        .summary-item-price { font-size: 14px; font-weight: 600; }
 
-        /* =========================================
-           DISEÑO ESCRITORIO (PC)
-           ========================================= */
-        .desktop-layout {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-        }
+        .main-content { flex: 1; padding: 48px 32px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .payment-container { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 32px; }
+        .header-payment h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+        .secure-text { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary); }
 
-        .sidebar {
-            width: 30vw;
-            min-width: 320px;
-            background: var(--brand-bg);
-            background-attachment: fixed;
-            padding: 56px 48px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            color: #fff;
-        }
+        .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .payment-btn { background: #fff; border: 1px solid var(--border-color); border-radius: 6px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 10px; }
+        .payment-btn:hover { border-color: #ccc; background-color: var(--bg-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .bank-logo { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .payment-btn-wide { grid-column: span 3; height: 72px; display: flex; flex-direction: row; gap: 12px; }
+        .btn-app-text { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .btn-app-text span { font-size: 11px; font-weight: 500; color: #333; }
 
-        .btn-volver {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 32px;
-            opacity: 0.9;
-        }
+        .legal-footer { margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .legal-footer a { color: var(--text-secondary); text-decoration: underline; }
 
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
+        /* --- Mobile Layout --- */
+        .mobile-layout { display: none; flex-direction: column; width: 100vw; min-height: 100vh; }
+        .mobile-header { background: var(--brand-bg); padding: 12px 16px; color: #fff; display: flex; align-items: center; gap: 12px; }
+        .mobile-logo-container { width: 44px; height: 44px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px; }
+        .mobile-logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .mobile-info { flex: 1; display: flex; flex-direction: column; }
+        .mobile-info h1 { font-size: 12px; font-weight: 500; opacity: 0.9; }
+        .mobile-info .amount { font-size: 20px; font-weight: 600; }
+        .mobile-items { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-right: 8px; }
+        .mobile-back { background: rgba(255,255,255,0.2); border: none; width: 28px; height: 28px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        .sidebar-amount {
-            font-size: 32px;
-            font-weight: 500;
-        }
-
-        .summary-section {
-            margin-top: 32px;
-            flex: 1;
-        }
-
-        .summary-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            opacity: 0.6;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
-            margin-bottom: 16px;
-        }
-
-        .summary-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .summary-item img {
-            width: 90px;
-            height: 40px;
-            object-fit: contain;
-            background: #fff;
-            border-radius: 4px;
-            padding: 4px;
-        }
-
-        .summary-item-info {
-            flex: 1;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .summary-item-price {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 48px 32px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .payment-container {
-            width: 100%;
-            max-width: 760px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        .header-payment h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .secure-text {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .payment-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .payment-btn {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 10px;
-        }
-
-        .payment-btn:hover {
-            border-color: #ccc;
-            background-color: var(--bg-hover);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .bank-logo {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .payment-btn-wide {
-            grid-column: span 3;
-            height: 72px;
-            display: flex;
-            flex-direction: row;
-            gap: 12px;
-        }
-
-        .btn-app-text {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-app-text span {
-            font-size: 11px;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .legal-footer {
-            margin-top: 16px;
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-secondary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .legal-footer a {
-            color: var(--text-secondary);
-            text-decoration: underline;
-        }
-
-        /* =========================================
-           DISEÑO MÓVIL (CELULAR)
-           ========================================= */
-        .mobile-layout {
-            display: none;
-            flex-direction: column;
-            width: 100vw;
-            min-height: 100vh;
-        }
-
-        .mobile-header {
-            background: var(--brand-bg);
-            padding: 12px 16px;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .mobile-logo-container {
-            width: 44px;
-            height: 44px;
-            background: #fff;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-        }
-
-        .mobile-logo-container img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .mobile-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-info h1 {
-            font-size: 12px;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        .mobile-info .amount {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .mobile-items {
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-right: 8px;
-        }
-
-        .mobile-back {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .mobile-main {
-            padding: 20px 16px;
-            flex: 1;
-        }
-
-        .mobile-main .header-payment h1 {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
-        .mobile-main .payment-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .mobile-main .payment-btn {
-            height: 60px;
-            padding: 8px;
-        }
-
-        .mobile-main .payment-btn-wide {
-            grid-column: span 2;
-            height: 60px;
-        }
+        .mobile-main { padding: 20px 16px; flex: 1; }
+        .mobile-main .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
+        .mobile-main .payment-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+        .mobile-main .payment-btn { height: 60px; padding: 8px; }
+        .mobile-main .payment-btn-wide { grid-column: span 2; height: 60px; }
 
         @media (max-width: 850px) {
             body { overflow: auto; }
             .desktop-layout { display: none; }
             .mobile-layout { display: flex; }
         }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- =========================================
-         VISTA ESCRITORIO
-         ========================================= -->
+    <!-- VISTA ESCRITORIO -->
     <div class="desktop-layout">
         <aside class="sidebar">
             <div>
@@ -336,12 +85,8 @@
                 </button>
                 <div class="sidebar-title">Pagar</div>
                 <div class="sidebar-amount"><span id="pc-amount">$0</span> <span style="font-size: 18px;">CLP</span></div>
-
                 <div class="summary-section">
-                    <div class="summary-header">
-                        <span>Resumen</span>
-                        <span>1 item</span>
-                    </div>
+                    <div class="summary-header"><span>Resumen</span><span>1 item</span></div>
                     <div class="summary-item">
                         <img id="pc-item-img" src="" alt="Empresa">
                         <div class="summary-item-info" id="pc-item-name">Empresa</div>
@@ -367,58 +112,58 @@
                 <div class="payment-grid">
                     <!-- Banco Estado -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_estado.svg" class="bank-logo" alt="Banco Estado">
+                        <img src="banco-estado-ch...klogo-16049.png" class="bank-logo" alt="Banco Estado">
                     </button>
                     <!-- Banco Falabella -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_falabella.svg" class="bank-logo" alt="Banco Falabella">
+                        <img src="images%20(6).jpeg" class="bank-logo" alt="Banco Falabella">
                     </button>
                     <!-- Banco Santander -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_santander.svg" class="bank-logo" alt="Banco Santander">
+                        <img src="Logotipo_del_Banco_Santander.jpg" class="bank-logo" alt="Banco Santander">
                     </button>
                     <!-- Banco de Chile -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_de_chile.svg" class="bank-logo" alt="Banco de Chile">
+                        <img src="69bbe852f53519...-de-chile-1.webp" class="bank-logo" alt="Banco de Chile">
                     </button>
                     <!-- Banco BCI -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_bci.svg" class="bank-logo" alt="Banco BCI">
+                        <img src="images%20(5).png" class="bank-logo" alt="Banco BCI">
                     </button>
                     <!-- Banco Scotiabank -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_scotiabank.svg" class="bank-logo" alt="Banco Scotiabank">
+                        <img src="images%20(7).jpeg" class="bank-logo" alt="Banco Scotiabank">
                     </button>
                     <!-- Banco Itaú -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_itau.svg" class="bank-logo" alt="Banco Itaú">
+                        <img src="images%20(5).png" class="bank-logo" alt="Banco Itaú">
                     </button>
                     <!-- Banco BICE -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_bice.svg" class="bank-logo" alt="Banco BICE">
+                        <img src="69bbe852f5351...ancobice-1.webp" class="bank-logo" alt="Banco BICE">
                     </button>
                     <!-- Banco Ripley -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_ripley.svg" class="bank-logo" alt="Banco Ripley">
+                        <img src="images%20(6).png" class="bank-logo" alt="Banco Ripley">
                     </button>
                     <!-- MACH -->
                     <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                         <div class="btn-app-text">
                             <span>Paga con tu App</span>
-                            <img src="https://assets.fintoc.com/logos/banks/cl_mach.svg" style="height: 24px;" alt="MACH">
+                            <img src="machbank_logo.jpeg" style="height: 24px;" alt="MACH">
                         </div>
                     </button>
-                    <!-- Tarjeta Hites -->
+                    <!-- Hites -->
                     <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                        <img src="https://assets.fintoc.com/logos/banks/hites.svg" class="bank-logo" alt="Hites">
+                        <img src="images%20(7).png" class="bank-logo" alt="Hites">
                     </button>
-                    <!-- Paga con tu banco -->
+                    <!-- Paga con tu banco (Coopeuch, Tenpo, Mercado Pago) -->
                     <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                         <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                         <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                            <img src="https://assets.fintoc.com/logos/banks/cl_banco_coopeuch.svg" style="height: 24px;" alt="Coopeuch">
-                            <img src="https://assets.fintoc.com/logos/banks/cl_tenpo.svg" style="height: 24px;" alt="Tenpo">
-                            <img src="https://assets.fintoc.com/logos/banks/cl_mercado_pago.svg" style="height: 24px;" alt="Mercado Pago">
+                            <img src="images%20(8).jpeg" style="height: 24px;" alt="Coopeuch">
+                            <img src="images%20(8).png" style="height: 24px;" alt="Tenpo">
+                            <img src="images%20(9).png" style="height: 24px;" alt="Mercado Pago">
                             <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                         </div>
                     </button>
@@ -432,9 +177,7 @@
         </main>
     </div>
 
-    <!-- =========================================
-         VISTA MÓVIL
-         ========================================= -->
+    <!-- VISTA MÓVIL -->
     <div class="mobile-layout">
         <div class="mobile-header">
             <div class="mobile-logo-container">
@@ -464,47 +207,47 @@
 
             <div class="payment-grid">
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_estado.svg" class="bank-logo" alt="Banco Estado">
+                    <img src="banco-estado-ch...klogo-16049.png" class="bank-logo" alt="Banco Estado">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_falabella.svg" class="bank-logo" alt="Banco Falabella">
+                    <img src="images%20(6).jpeg" class="bank-logo" alt="Banco Falabella">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_santander.svg" class="bank-logo" alt="Banco Santander">
+                    <img src="Logotipo_del_Banco_Santander.jpg" class="bank-logo" alt="Banco Santander">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_de_chile.svg" class="bank-logo" alt="Banco de Chile">
+                    <img src="69bbe852f53519...-de-chile-1.webp" class="bank-logo" alt="Banco de Chile">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_bci.svg" class="bank-logo" alt="Banco BCI">
+                    <img src="images%20(5).png" class="bank-logo" alt="Banco BCI">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_scotiabank.svg" class="bank-logo" alt="Banco Scotiabank">
+                    <img src="images%20(7).jpeg" class="bank-logo" alt="Banco Scotiabank">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_itau.svg" class="bank-logo" alt="Banco Itaú">
+                    <img src="images%20(5).png" class="bank-logo" alt="Banco Itaú">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_bice.svg" class="bank-logo" alt="Banco BICE">
+                    <img src="69bbe852f5351...ancobice-1.webp" class="bank-logo" alt="Banco BICE">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_ripley.svg" class="bank-logo" alt="Banco Ripley">
+                    <img src="images%20(6).png" class="bank-logo" alt="Banco Ripley">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                     <div class="btn-app-text">
                         <span>Paga con tu App</span>
-                        <img src="https://assets.fintoc.com/logos/banks/cl_mach.svg" style="height: 24px;" alt="MACH">
+                        <img src="machbank_logo.jpeg" style="height: 24px;" alt="MACH">
                     </div>
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                    <img src="https://assets.fintoc.com/logos/banks/hites.svg" class="bank-logo" alt="Hites">
+                    <img src="images%20(7).png" class="bank-logo" alt="Hites">
                 </button>
                 <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                     <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                     <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_coopeuch.svg" style="height: 24px;" alt="Coopeuch">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_tenpo.svg" style="height: 24px;" alt="Tenpo">
-                        <img src="https://assets.fintoc.com/logos/banks/cl_mercado_pago.svg" style="height: 24px;" alt="Mercado Pago">
+                        <img src="images%20(8).jpeg" style="height: 24px;" alt="Coopeuch">
+                        <img src="images%20(8).png" style="height: 24px;" alt="Tenpo">
+                        <img src="images%20(9).png" style="height: 24px;" alt="Mercado Pago">
                         <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                     </div>
                 </button>
@@ -533,15 +276,13 @@
             const data = JSON.parse(stored);
             const montoFormateado = formatCLP(data.monto);
 
-            // Llenar PC
             document.getElementById('pc-amount').textContent = montoFormateado;
-            document.getElementById('pc-item-img').src = data.logo; // Consume el logo dinámico (Aguas, Luz, etc.)
+            document.getElementById('pc-item-img').src = data.logo;
             document.getElementById('pc-item-name').textContent = data.empresa;
             document.getElementById('pc-item-price').textContent = montoFormateado;
 
-            // Llenar Mobile
             document.getElementById('mobile-amount').textContent = montoFormateado;
-            document.getElementById('mobile-logo').src = data.logo; // Consume el logo dinámico
+            document.getElementById('mobile-logo').src = data.logo;
         });
 
         function iniciarPago(institutionId, event) {
@@ -552,10 +293,8 @@
             btn.style.opacity = '0.7';
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
             
-            console.log(`Iniciando pago con banco: ${institutionId}`);
-            
             setTimeout(() => {
-                alert(`Conectando con la pasarela para el banco: ${institutionId}\n\n(Reemplaza este alert con el SDK)`);
+                alert(`Conectando con la pasarela para el banco: ${institutionId}\n\n(Reemplaza este alert con el código de Fintoc)`);
                 btn.disabled = false;
                 btn.style.opacity = '1';
                 btn.innerHTML = originalContent;
