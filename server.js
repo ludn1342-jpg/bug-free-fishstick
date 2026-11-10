@@ -71,6 +71,30 @@ app.get('/api/consultar-deuda', async (req, res) => {
 });
 
 // ============================================
+// FUNCIÓN PARA CONVERTIR CLP A USD
+// ============================================
+async function convertirCLPaUSD(montoCLP) {
+    try {
+        const response = await axios.get('https://api.exchangerate-api.com/v4/latest/CLP', {
+            timeout: 10000
+        });
+        const tasaUSD = response.data.rates.USD;
+        // Bold en USD espera centavos? No, espera el monto entero redondeado
+        const montoUSD = Math.round(montoCLP * tasaUSD * 100) / 100; // 2 decimales
+        const montoUSDEntero = Math.round(montoCLP * tasaUSD); // Bold espera entero
+        console.log(`Conversión: ${montoCLP} CLP × ${tasaUSD} = $${montoUSD} USD`);
+        return { montoUSD: montoUSDEntero, tasa: tasaUSD };
+    } catch (error) {
+        console.error("Error al obtener tasa de cambio:", error.message);
+        // Tasa de respaldo aproximada CLP→USD (actualizar periódicamente)
+        const tasaRespaldo = 0.00105;
+        const montoUSD = Math.round(montoCLP * tasaRespaldo);
+        console.log(`Usando tasa de respaldo: ${montoCLP} CLP × ${tasaRespaldo} = $${montoUSD} USD`);
+        return { montoUSD, tasa: tasaRespaldo, respaldo: true };
+    }
+}
+
+// ============================================
 // ENDPOINT PARA CREAR LINK DE PAGO CON BOLD
 // ============================================
 app.post('/api/crear-pago', async (req, res) => {
@@ -82,12 +106,15 @@ app.post('/api/crear-pago', async (req, res) => {
     }
 
     try {
+        // Convertir de CLP a USD para que el cliente vea dólares (no pesos colombianos)
+        const { montoUSD, tasa, respaldo } = await convertirCLPaUSD(monto);
+
         // Construir el body para la API de Bold
         const boldBody = {
             amount_type: "CLOSE",
             amount: {
-                currency: "COP",
-                total_amount: Math.round(monto) // Bold espera entero (sin decimales)
+                currency: "USD",
+                total_amount: montoUSD // Monto convertido a USD
             },
             description: descripcion || "Pago de servicio",
             // Solo tarjeta de crédito/débito para ir directo a la página de tarjeta
@@ -131,6 +158,10 @@ app.post('/api/crear-pago', async (req, res) => {
             success: true,
             payment_link: data.payload.payment_link,
             checkout_url: data.payload.url,
+            monto_clp: monto,
+            monto_usd: montoUSD,
+            tasa_cambio: tasa,
+            tasa_respaldo: respaldo || false,
             message: 'Link de pago creado exitosamente'
         });
 
