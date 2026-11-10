@@ -371,6 +371,7 @@
 
     <script>
         let empresaActual = { nombre:'', logo:'', utilityNumber:'', utilityVersion:'', industriaId:'', campo:'' };
+        let deudaSeleccionada = null; // NUEVA VARIABLE
 
         const vistaCategorias = document.getElementById('vista-categorias');
         const vistaPago       = document.getElementById('vista-pago');
@@ -387,6 +388,7 @@
 
         function seleccionarEmpresa(nombre, logoUrl, utilityNumber, utilityVersion, industriaId, campo) {
             empresaActual = { nombre, logo: logoUrl, utilityNumber, utilityVersion, industriaId, campo };
+            deudaSeleccionada = null; // Reseteamos
 
             vistaCategorias.style.display = 'none';
             vistaPago.style.display = 'block';
@@ -485,12 +487,32 @@
         function seleccionarDeuda(elementoHtml, monto, tipo) {
             document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
             elementoHtml.classList.add('selected');
+            
+            // GUARDAMOS LA DEUDA
+            deudaSeleccionada = { monto: monto, tipo: tipo };
+
             document.getElementById('detalle-deuda').style.display = 'block';
             document.getElementById('detalle-tipo').textContent = tipo;
             document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP' }).format(monto);
         }
 
-        function pagarAhora() { alert("Redirigiendo a la pasarela de pago..."); }
+        // NUEVA FUNCIÓN: Guarda en localStorage y va a pago.html
+        function pagarAhora() {
+            if (!deudaSeleccionada) {
+                alert("Por favor, selecciona una deuda primero.");
+                return;
+            }
+
+            const dataParaPago = {
+                empresa: empresaActual.nombre,
+                logo: empresaActual.logo,
+                monto: deudaSeleccionada.monto,
+                tipoDeuda: deudaSeleccionada.tipo
+            };
+
+            localStorage.setItem('sencillito_pago_pendiente', JSON.stringify(dataParaPago));
+            window.location.href = 'pago.html';
+        }
 
         function volverAFormulario() {
             vistaDeuda.style.display = 'none';
@@ -521,4 +543,4 @@
         }
     </script>
 </body>
-</html>
+                    </html>
