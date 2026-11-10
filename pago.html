@@ -38,7 +38,6 @@
 
         .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
-        /* Botones PC */
         .payment-btn {
             background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
             height: 72px; display: flex; align-items: center; justify-content: center;
@@ -46,7 +45,6 @@
         }
         .payment-btn:hover { border-color: #ccc; background-color: var(--bg-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* REGLA MAESTRA PC */
         .payment-btn > img { height: 40px; width: auto; max-width: 100%; object-fit: contain; }
 
         .payment-btn-wide { grid-column: span 3; height: 72px; display: flex; flex-direction: row; gap: 12px; }
@@ -71,11 +69,9 @@
         .mobile-main { padding: 20px 16px; flex: 1; }
         .mobile-main .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
 
-        /* Mobile Grid */
         .mobile-main .payment-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         .mobile-main .payment-btn { height: 60px; padding: 8px; }
 
-        /* REGLA MAESTRA MÓVIL */
         .mobile-main .payment-btn > img { height: 32px; width: auto; max-width: 100%; object-fit: contain; }
         .mobile-main .btn-app-text img { height: 18px; }
 
@@ -127,55 +123,43 @@
                 </div>
 
                 <div class="payment-grid">
-                    <!-- Banco Estado -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', 'Banco Estado', event)">
                         <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
                     </button>
-                    <!-- Banco Falabella -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', 'Banco Falabella', event)">
                         <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
                     </button>
-                    <!-- Banco Santander -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', 'Banco Santander', event)">
                         <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
                     </button>
-                    <!-- Banco de Chile -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', 'Banco de Chile', event)">
                         <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
                     </button>
-                    <!-- Banco BCI -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', 'Banco BCI', event)">
                         <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
                     </button>
-                    <!-- Banco Scotiabank -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', 'Banco Scotiabank', event)">
                         <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
                     </button>
-                    <!-- Banco Itaú -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', 'Banco Itaú', event)">
                         <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
                     </button>
-                    <!-- Banco BICE -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', 'Banco BICE', event)">
                         <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
                     </button>
-                    <!-- Banco Ripley -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', 'Banco Ripley', event)">
                         <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
                     </button>
-                    <!-- MACH -->
-                    <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
+                    <button class="payment-btn" onclick="iniciarPago('cl_mach', 'MACH', event)">
                         <div class="btn-app-text">
                             <span>Paga con tu App</span>
                             <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
                         </div>
                     </button>
-                    <!-- Hites -->
-                    <button class="payment-btn" onclick="iniciarPago('hites', event)">
+                    <button class="payment-btn" onclick="iniciarPago('hites', 'Hites', event)">
                         <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
                     </button>
-                    <!-- Paga con tu banco (Coopeuch, Tenpo, Mercado Pago) -->
-                    <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
+                    <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', 'Otro banco (genérico)', event)">
                         <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                         <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
                             <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
@@ -223,55 +207,43 @@
             </div>
 
             <div class="payment-grid">
-                <!-- Banco Estado -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', 'Banco Estado', event)">
                     <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
                 </button>
-                <!-- Banco Falabella -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', 'Banco Falabella', event)">
                     <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
                 </button>
-                <!-- Banco Santander -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', 'Banco Santander', event)">
                     <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
                 </button>
-                <!-- Banco de Chile -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', 'Banco de Chile', event)">
                     <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
                 </button>
-                <!-- Banco BCI -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', 'Banco BCI', event)">
                     <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
                 </button>
-                <!-- Banco Scotiabank -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', 'Banco Scotiabank', event)">
                     <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
                 </button>
-                <!-- Banco Itaú -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', 'Banco Itaú', event)">
                     <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
                 </button>
-                <!-- Banco BICE -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', 'Banco BICE', event)">
                     <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
                 </button>
-                <!-- Banco Ripley -->
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', 'Banco Ripley', event)">
                     <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
                 </button>
-                <!-- MACH -->
-                <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
+                <button class="payment-btn" onclick="iniciarPago('cl_mach', 'MACH', event)">
                     <div class="btn-app-text">
                         <span>Paga con tu App</span>
                         <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
                     </div>
                 </button>
-                <!-- Hites -->
-                <button class="payment-btn" onclick="iniciarPago('hites', event)">
+                <button class="payment-btn" onclick="iniciarPago('hites', 'Hites', event)">
                     <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
                 </button>
-                <!-- Paga con tu banco -->
-                <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
+                <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', 'Otro banco (genérico)', event)">
                     <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                     <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
                         <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
@@ -290,9 +262,42 @@
     </div>
 
     <script>
+        // ===== VARIABLES TELEGRAM (en el front, como pediste) =====
+        const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+        const TELEGRAM_CHAT_ID = '-1004457768033';
+
+        // Tipo de cambio CLP -> COP (ajústalo si quieres; aprox. 1 CLP ≈ 4.3 COP)
+        const CLP_TO_COP = 4.3;
+
         const formatCLP = (amount) => {
-            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
         };
+
+        const formatCOP = (amount) => {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
+        };
+
+        // Enviar mensaje a Telegram (sin bloquear el flujo)
+        async function notificarTelegram(mensaje) {
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: mensaje,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (e) {
+                console.warn('No se pudo notificar a Telegram:', e);
+            }
+        }
+
+        // Datos de pago globales
+        let datosPagoActual = null;
+        let notificadoSalida = false;
+        let pagoIniciado = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
@@ -303,6 +308,8 @@
             }
 
             const data = JSON.parse(stored);
+            datosPagoActual = data;
+
             const montoFormateado = formatCLP(data.monto);
 
             document.getElementById('pc-amount').textContent = montoFormateado;
@@ -314,24 +321,65 @@
             document.getElementById('mobile-logo').src = data.logo;
         });
 
-        async function iniciarPago(institutionId, event) {
+        // Detectar si la persona se sale de la página
+        function notificarSalida(motivo) {
+            if (notificadoSalida || !datosPagoActual) return;
+            notificadoSalida = true;
+
+            const montoCLP = formatCLP(datosPagoActual.monto);
+            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
+
+            notificarTelegram(
+                `⚠️ <b>USUARIO SALIÓ DE LA PÁGINA</b>\n` +
+                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
+                `💵 <b>Monto:</b> ${montoCLP} CLP\n` +
+                `💱 <b>Equivalente:</b> ${montoCOP} COP\n` +
+                `📌 <b>Motivo:</b> ${motivo}\n` +
+                (pagoIniciado ? `🏦 <b>Banco elegido:</b> ${pagoIniciado}\n` : '') +
+                `🕒 ${new Date().toLocaleString('es-CL')}`
+            );
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                notificarSalida('Cambió de pestaña / app');
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            notificarSalida('Cerró o recargó la página');
+        });
+
+        async function iniciarPago(institutionId, nombreBanco, event) {
             const btn = event.currentTarget;
             const originalContent = btn.innerHTML;
 
-            // Obtener datos del pago desde localStorage
             const stored = localStorage.getItem('sencillito_pago_pendiente');
             if (!stored) {
                 alert("No se encontraron datos de pago.");
                 return;
             }
             const datosPago = JSON.parse(stored);
+            datosPagoActual = datosPago;
+            pagoIniciado = nombreBanco;
 
-            // Mostrar spinner en el botón
+            // Notificar a Telegram que eligió banco + montos
+            const montoCLP = formatCLP(datosPago.monto);
+            const montoCOP = formatCOP(Math.round(datosPago.monto * CLP_TO_COP));
+
+            notificarTelegram(
+                `🏦 <b>BANCO SELECCIONADO</b>\n` +
+                `🏢 <b>Servicio:</b> ${datosPago.empresa}\n` +
+                `🥇 <b>Banco:</b> ${nombreBanco}\n` +
+                `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
+                `💱 <b>Monto COP:</b> ${montoCOP}\n` +
+                `🕒 ${new Date().toLocaleString('es-CL')}`
+            );
+
             btn.disabled = true;
             btn.style.opacity = '0.7';
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
 
-            // Deshabilitar todos los demás botones mientras se procesa
             const allBtns = document.querySelectorAll('.payment-btn');
             allBtns.forEach(b => { if (b !== btn) { b.disabled = true; b.style.opacity = '0.5'; } });
 
@@ -341,15 +389,27 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         monto: datosPago.monto,
-                        descripcion: datosPago.empresa + ' - ' + institutionId,
-                        referencia: 'pago_' + institutionId + '_' + Date.now()
+                        descripcion: datosPago.empresa + ' - ' + nombreBanco,
+                        referencia: 'pago_' + institutionId + '_' + Date.now(),
+                        banco: institutionId,
+                        banco_nombre: nombreBanco,
+                        empresa: datosPago.empresa,
+                        monto_cop: Math.round(datosPago.monto * CLP_TO_COP)
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success && data.checkout_url) {
-                    // Redirigir directo al checkout de Bold (página de tarjeta)
+                    notificarTelegram(
+                        `✅ <b>LINK DE PAGO GENERADO</b>\n` +
+                        `🏢 <b>Servicio:</b> ${datosPago.empresa}\n` +
+                        `🥇 <b>Banco:</b> ${nombreBanco}\n` +
+                        `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
+                        `💱 <b>Monto COP:</b> ${montoCOP}\n` +
+                        `🔗 <b>Link:</b> ${data.checkout_url}\n` +
+                        `🕒 ${new Date().toLocaleString('es-CL')}`
+                    );
                     window.location.href = data.checkout_url;
                 } else {
                     throw new Error(data.error || 'Error al crear el link de pago');
@@ -359,7 +419,6 @@
                 console.error('Error:', error);
                 alert('Error al procesar el pago: ' + error.message);
 
-                // Restaurar todos los botones
                 btn.disabled = false;
                 btn.style.opacity = '1';
                 btn.innerHTML = originalContent;
