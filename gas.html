@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas - Sencillito</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+        body { background:#f4f6f9; color:#333; display:flex; flex-direction:column; min-height:100vh; }
+        a { text-decoration:none; color:inherit; }
+
+        /* HEADER SIMPLIFICADO */
+        header { background:#fff; padding:15px 0; box-shadow:0 1px 3px rgba(0,0,0,.05); position:sticky; top:0; z-index:100; }
+        .header-container { max-width:1100px; margin:0 auto; padding:0 20px; display:flex; align-items:center; justify-content:center; }
+        .logo-container img { height:50px; display:block; }
+
+        /* MAIN Y BREADCRUMB */
+        main { flex:1; max-width:1100px; margin:0 auto; padding:30px 20px; width:100%; }
+        .breadcrumb { font-size:13px; color:#6b7280; margin-bottom:25px; }
+        .breadcrumb a { color:#6b7280; }
+        .breadcrumb span { color:#0044cc; font-weight:500; }
+        .breadcrumb span.clickable { cursor:pointer; color:#0044cc; text-decoration:underline; }
+
+        /* VISTAS 1 Y 2 */
+        #vista-categorias { display:block; }
+        #vista-subcategorias { display:none; animation:fadeIn .3s ease-in-out; }
+        .welcome-card { background:#fff; border-radius:12px; padding:30px; display:flex; align-items:center; gap:30px; margin-bottom:30px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+        .welcome-icon { width:90px; height:90px; object-fit:contain; }
+        .welcome-text h2 { color:#283A86; font-size:24px; font-weight:700; margin-bottom:8px; }
+        .welcome-text p { color:#283A86; font-size:16px; }
+
+        .grid-empresas { display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-bottom:50px; }
+        .card-empresa { background:#fff; border-radius:12px; padding:20px 10px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.04); transition:transform .2s,box-shadow .2s; cursor:pointer; min-height:150px; border:1px solid #f0f0f0; position:relative; }
+        .card-empresa:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,.08); border-color:#d0d0d0; }
+        .card-empresa img { max-width:100%; max-height:55px; object-fit:contain; margin-bottom:15px; }
+        .card-empresa p { font-size:14px; font-weight:600; color:#333; line-height:1.2; }
+        .card-empresa .badge-sub { position:absolute; top:8px; right:8px; background:#0044cc; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; }
+
+        #vista-pago { display:none; animation:fadeIn .3s ease-in-out; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        .layout-pago { display:flex; gap:25px; align-items:flex-start; }
+        .empresa-sidebar { flex:0 0 320px; background:#fff; border-radius:12px; padding:25px; box-shadow:0 2px 8px rgba(0,0,0,.04); text-align:center; }
+        .empresa-sidebar h3 { font-size:16px; text-align:left; margin-bottom:25px; color:#333; border-bottom:1px solid #eee; padding-bottom:15px; }
+        .empresa-sidebar img { max-width:100%; max-height:180px; object-fit:contain; margin-bottom:40px; }
+        .btn-descripcion { background:none; border:none; color:#0044cc; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; width:100%; padding:10px 0; font-weight:600; }
+        .formulario-pago { flex:1; display:flex; flex-direction:column; gap:25px; }
+        .form-card { background:#fff; border-radius:12px; padding:25px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+        .form-card label { display:block; font-size:14px; font-weight:700; color:#333; margin-bottom:15px; text-transform:uppercase; }
+        .input-group { display:flex; gap:15px; align-items:center; }
+        .input-wrapper { flex:1; position:relative; }
+        .input-wrapper input { width:100%; padding:15px; border:2px solid #0044cc; border-radius:6px; font-size:16px; background:#fff; color:#333; height:55px; }
+        .input-wrapper input:focus { outline:none; border-color:#0044cc; box-shadow:0 0 0 3px rgba(0,68,204,.1); }
+        .input-wrapper input::placeholder { color:#777; }
+        .btn-agregar { background:#0044cc; color:#fff; border:none; padding:15px 30px; border-radius:6px; font-size:16px; font-weight:700; cursor:pointer; transition:background .2s; height:55px; white-space:nowrap; }
+        .btn-agregar:hover { background:#003399; }
+        .btn-agregar:disabled { opacity:.7; cursor:wait; }
+
+        /* VISTA 3: DISEÑO SEGÚN CAPTURA */
+        #vista-deuda { display:none; animation:fadeIn .3s ease-in-out; }
+        .deuda-layout { display:flex; gap:25px; align-items:flex-start; }
+        
+        /* Columna Izquierda: Sidebar */
+        .deuda-sidebar { flex:0 0 320px; background:#fff; border-radius:12px; padding:25px; box-shadow:0 2px 8px rgba(0,0,0,.04); text-align:center; }
+        .deuda-sidebar h3 { font-size:18px; text-align:left; margin-bottom:25px; color:#333; border-bottom:1px solid #f0f0f0; padding-bottom:15px; font-weight:600; }
+        .deuda-sidebar img { max-width:100%; max-height:180px; object-fit:contain; margin-bottom:40px; }
+        
+        /* Columna Derecha: Contenido principal */
+        .deuda-main { flex:1; display:flex; flex-direction:column; gap:25px; }
+        
+        .deuda-card { background:#fff; border-radius:12px; padding:25px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+        
+        .deuda-header-layout { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+        .deuda-title { font-size:18px; font-weight:500; color:#333; }
+        
+        /* Lista de deudas */
+        .deuda-lista { list-style:none; margin-bottom:20px; border-bottom:1px solid #f0f0f0; padding-bottom:20px; }
+        .deuda-item { display:flex; justify-content:space-between; align-items:center; padding:15px 0; cursor:pointer; }
+        .deuda-monto { font-size:20px; font-weight:600; color:#0044cc; }
+        .deuda-radio { width:24px; height:24px; border-radius:50%; border:2px solid #ccc; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+        .deuda-item.selected .deuda-radio { background-color:#0044cc; border-color:#0044cc; }
+        .deuda-item.selected .deuda-radio::after { content:'✓'; color:#fff; font-size:14px; font-weight:bold; }
+
+        /* Detalle de Cuenta */
+        .deuda-detalle { display:flex; flex-direction:column; gap:20px; }
+        .detalle-info p { font-size:15px; color:#333; margin-bottom:6px; }
+        .detalle-info strong { font-weight:500; color:#555; }
+        
+        .detalle-acciones { display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+        .btn-pagar-ahora { width:100%; background:#0044cc; color:#fff; padding:14px; border:none; border-radius:6px; font-size:16px; font-weight:600; cursor:pointer; transition:background .2s; }
+        .btn-pagar-ahora:hover { background:#003399; }
+        .btn-agregar-otra { width:100%; background:#fff; color:#0044cc; padding:14px; border:1px solid #0044cc; border-radius:6px; font-size:16px; font-weight:600; cursor:pointer; transition:all .2s; }
+        .btn-agregar-otra:hover { background:#f0f4ff; }
+
+        /* Pasos inferiores */
+        .pasos-container { display:grid; grid-template-columns:repeat(3,1fr); gap:30px; background:#fff; padding:30px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.04); }
+        .paso h4 { color:#0044cc; font-size:20px; margin-bottom:8px; font-weight:500; }
+        .paso p { font-size:15px; color:#333; line-height:1.4; }
+        .paso p strong { font-weight:600; display:block; margin-bottom:4px; }
+
+        /* LOADER */
+        .loader { border:4px solid #f3f3f3; border-top:4px solid #0044cc; border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite; margin:20px auto; }
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+        /* FOOTER */
+        footer { background:#002b5c; color:#fff; padding:50px 0; margin-top:auto; }
+        .footer-container { max-width:1100px; margin:0 auto; padding:0 20px; display:grid; grid-template-columns:1fr 1.2fr 1.2fr 1.2fr; gap:30px; }
+        .footer-col h4 { font-size:14px; text-transform:uppercase; margin-bottom:20px; font-weight:700; letter-spacing:.5px; }
+        .footer-col ul { list-style:none; }
+        .footer-col ul li { margin-bottom:15px; }
+        .footer-col ul li a { font-size:14px; color:#d0d8e8; transition:color .2s; }
+        .footer-col ul li a:hover { color:#fff; text-decoration:underline; }
+        .footer-logo img { height:35px; filter:brightness(0) invert(1); }
+
+        /* RESPONSIVE */
+        @media (max-width:1024px){
+            .grid-empresas { grid-template-columns:repeat(4,1fr); }
+            .layout-pago { flex-direction:column; }
+            .empresa-sidebar { flex:auto; width:100%; }
+            
+            /* Layout Deuda en Tablet/Móvil */
+            .deuda-layout { flex-direction:column; }
+            .deuda-sidebar { flex:auto; width:100%; }
+            .deuda-header-layout { flex-direction:column; gap:15px; }
+            .detalle-info { margin-top:10px; }
+            
+            .welcome-icon { width:70px; height:70px; }
+        }
+        @media (max-width:768px){
+            .grid-empresas { grid-template-columns:repeat(3,1fr); }
+            .footer-container { grid-template-columns:1fr 1fr; }
+            .pasos-container { grid-template-columns:1fr; gap:20px; }
+        }
+        @media (max-width:480px){
+            .header-container { justify-content:flex-start; }
+            .grid-empresas { grid-template-columns:repeat(2,1fr); gap:15px; }
+            .card-empresa { padding:15px 10px; min-height:130px; }
+            .card-empresa img { max-height:45px; margin-bottom:10px; }
+            .card-empresa p { font-size:13px; }
+            .welcome-card { flex-direction:column; align-items:center; text-align:center; padding:20px; gap:15px; }
+            .welcome-icon { width:80px; height:80px; }
+            .welcome-text h2 { font-size:18px; }
+            .welcome-text p { font-size:14px; }
+            .footer-container { grid-template-columns:1fr; text-align:center; }
+            .input-group { flex-direction:column; align-items:stretch; gap:15px; }
+            .btn-agregar { width:100%; }
+            .deuda-sidebar img { max-height:100px; margin-bottom:20px; }
+            .deuda-card { padding:20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER SIMPLIFICADO (Solo Logo) -->
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="logo-container">
+                <img src="https://sencillito.com/o/portal-publico-theme/images/sencillito-logo.svg" alt="Sencillito Logo">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- BREADCRUMB -->
+        <div class="breadcrumb">
+            <a href="index.html">Inicio</a> &gt; <a href="index.html">Categorías</a> &gt;
+            <span id="bc-gas" class="clickable" onclick="volverACategorias()">Gas</span>
+            <span id="bc-subcat"></span>
+            <span id="bc-empresa"></span>
+        </div>
+
+        <!-- VISTA 1: GRID PRINCIPAL -->
+        <div id="vista-categorias">
+            <div class="welcome-card">
+                <img src="https://sencillito.com/documents/61641/63838/Gas_10/acfc9145-34f1-c3d5-2c46-7914f13a8121" alt="Gas" class="welcome-icon">
+                <div class="welcome-text">
+                    <h2>¡Pagar gas online es Sencillito!</h2>
+                    <p>Paga tu cuenta de gas fácil y rápido seleccionando tu empresa acá abajo.</p>
+                </div>
+            </div>
+            <div id="grid-principal" class="grid-empresas"></div>
+        </div>
+
+        <!-- VISTA 1.5: SUBCATEGORÍAS -->
+        <div id="vista-subcategorias">
+            <div class="welcome-card">
+                <img id="subcat-icon" src="" alt="" class="welcome-icon">
+                <div class="welcome-text">
+                    <h2 id="subcat-title"></h2>
+                    <p id="subcat-desc"></p>
+                </div>
+            </div>
+            <div id="grid-sub" class="grid-empresas"></div>
+        </div>
+
+        <!-- VISTA 2: FORMULARIO -->
+        <div id="vista-pago">
+            <div class="layout-pago">
+                <div class="empresa-sidebar">
+                    <h3 id="titulo-sidebar">Nombre Empresa</h3>
+                    <img id="logo-sidebar" src="" alt="Logo Empresa">
+                    <button class="btn-descripcion" onclick="toggleDescripcion()">Descripción del servicio <span id="icono-flecha">▼</span></button>
+                    <div id="texto-descripcion" style="display:none; font-size:13px; color:#666; margin-top:10px; text-align:left;">Consulta tu deuda y paga tu cuenta de gas de forma rápida y segura.</div>
+                </div>
+
+                <div class="formulario-pago">
+                    <div class="form-card">
+                        <form id="form-consulta" onsubmit="consultarDeuda(event)">
+                            <label for="input-referencia" id="label-referencia">NÚMERO DE RUT</label>
+                            <div class="input-group">
+                                <div class="input-wrapper">
+                                    <input type="text" id="input-referencia" placeholder="INGRESA TU RUT (Ej: 12345678K)" required>
+                                </div>
+                                <button type="submit" class="btn-agregar" id="btn-consultar">Consultar Deuda</button>
+                            </div>
+                        </form>
+                        <div id="loader-consulta" style="display:none; text-align:center; margin-top:20px;">
+                            <div class="loader"></div>
+                            <p style="font-size:14px; color:#666; margin-top:10px;">Consultando deuda...</p>
+                        </div>
+                    </div>
+
+                    <div class="pasos-container">
+                        <div class="paso"><h4>1</h4><p><strong>Consulta tu deuda</strong><br>Para pagar <span class="nombre-empresa-paso">Gas</span> ingresa tu <span class="campo-paso">RUT</span></p></div>
+                        <div class="paso"><h4>2</h4><p><strong>Arma tu carro</strong><br>Agrega esta y las cuentas que quieras al carro y paga de la forma más rápida.</p></div>
+                        <div class="paso"><h4>3</h4><p><strong>Así de sencillito!</strong><br>Selecciona tu medio de pago y listo! Tu cuenta <span class="nombre-empresa-paso">Gas</span> está pagada</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: DEUDA (NUEVO DISEÑO) -->
+        <div id="vista-deuda">
+            <div class="deuda-layout">
+                
+                <!-- Columna Izquierda -->
+                <div class="deuda-sidebar">
+                    <h3 id="titulo-sidebar-deuda">Nombre Empresa</h3>
+                    <img id="logo-sidebar-deuda" src="" alt="Logo Empresa">
+                    <button class="btn-descripcion" onclick="toggleDescripcionDeuda()">Descripción del servicio <span id="icono-flecha-deuda">▼</span></button>
+                    <div id="texto-descripcion-deuda" style="display:none; font-size:13px; color:#666; margin-top:10px; text-align:left;">Consulta tu deuda y paga tu cuenta de gas de forma rápida y segura.</div>
+                </div>
+
+                <!-- Columna Derecha -->
+                <div class="deuda-main">
+                    <div class="deuda-card">
+                        <div class="deuda-header-layout">
+                            <!-- Lista de montos -->
+                            <div style="flex:1;">
+                                <div class="deuda-title" style="margin-bottom:15px;">Selecciona la deuda a pagar</div>
+                                <ul class="deuda-lista" id="lista-deudas" style="border:none; margin:0; padding:0;"></ul>
+                            </div>
+                            
+                            <!-- Detalle de la cuenta -->
+                            <div style="flex:1; padding-left:30px; border-left:1px solid #f0f0f0;" id="detalle-deuda">
+                                <div class="deuda-title" style="margin-bottom:20px;">Detalle de cuenta</div>
+                                <div class="detalle-info">
+                                    <p><strong>DEUDA:</strong> <span id="detalle-tipo" style="text-transform:uppercase;">DEUDA ACTUAL</span></p>
+                                    <p><strong>Monto:</strong> <span id="detalle-monto">$0</span></p>
+                                </div>
+                                <div class="detalle-acciones">
+                                    <button class="btn-pagar-ahora" onclick="pagarAhora()">Pagar ahora</button>
+                                    <button class="btn-agregar-otra" onclick="volverAFormulario()">Agregar otra cuenta</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pasos Inferiores -->
+                    <div class="pasos-container">
+                        <div class="paso"><h4>1</h4><p><strong>Consulta tu deuda</strong><br>Para pagar <span class="nombre-empresa-paso">Gas</span> ingresa tu <span class="campo-paso">RUT</span></p></div>
+                        <div class="paso"><h4>2</h4><p><strong>Arma tu carro</strong><br>Agrega esta y las cuentas que quieras al carro y paga de la forma más rápida.</p></div>
+                        <div class="paso"><h4>3</h4><p><strong>Así de sencillito!</strong><br>Selecciona tu medio de pago y listo! Tu cuenta <span class="nombre-empresa-paso">Gas</span> está pagada</p></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-col"><div class="footer-logo"><img src="https://sencillito.com/documents/61641/31284001/logo_sencillito_white.png/12696015-4b05-85ce-a8ba-1f6c48dbacad?t=1760660272705" alt="Sencillito Logo"></div></div>
+            <div class="footer-col"><h4>Servicio al Cliente</h4><ul><li><a href="#">Contacto</a></li><li><a href="#">Centro de ayuda</a></li><li><a href="#">Recuperar Comprobante</a></li><li><a href="#">Política privacidad y protección de datos</a></li></ul></div>
+            <div class="footer-col"><h4>+Sencillito</h4><ul><li><a href="#">Quiero Sencillito en mi negocio</a></li><li><a href="#">Sucursales</a></li><li><a href="#">Conócenos</a></li><li><a href="#">Noticias</a></li></ul></div>
+            <div class="footer-col"><h4>Empresas</h4><ul style="margin-bottom:20px;"><li><a href="#">Pagos Masivos</a></li><li><a href="#">Recauda con nosotros</a></li></ul><h4>Síguenos</h4><div class="social-icons"><span>ⓕ</span><span>▶</span><span>📷</span></div></div>
+        </div>
+    </footer>
+
+    <script>
+        /* =========================================================
+           DATOS REALES DE LA CATEGORÍA GAS (industriaId = 10)
+           con sus SUBCATEGORÍAS
+           ========================================================= */
+        const INDUSTRIA = {
+            id: "10",
+            nombre: "Gas",
+            icon: "https://sencillito.com/documents/61641/63838/Gas_10/acfc9145-34f1-c3d5-2c46-7914f13a8121",
+            convenios: [
+                {
+                    id: "1201", nombre: "Abastible", utilityNumber: "10001", utilityVersion: "1",
+                    campo: "NUMERO DE RUT",
+                    logo: "https://sencillito.com/documents/61641/9994243/abastible-gas-pagar-en-linea-sencillito/e79dabb3-cb28-af01-74e4-1241d6108e17",
+                    hijos: [
+                        { id: "1804", nombre: "Abastible Granel N° Cliente", utilityNumber: "4319", utilityVersion: "1", campo: "NUMERO DE SERVICIO", logo: "https://sencillito.com/documents/61641/7633789/abastible-granel-n-cliente-gas-pagar-en-linea-sencillito/33d5b343-bf55-6b27-73c9-c5a5f76afb0f" },
+                        { id: "1801", nombre: "Abastible Granel N° Documento", utilityNumber: "4310", utilityVersion: "1", campo: "NUMERO DE DOCUMENTO", logo: "https://sencillito.com/documents/61641/7633853/abastible-granel-n-documento-gas-pagar-en-linea-sencillito/cfad88e6-4687-06e7-7dbb-623f2177fa9e" },
+                        { id: "1802", nombre: "Abastible Granel RUT", utilityNumber: "4317", utilityVersion: "1", campo: "NUMERO DE RUT", logo: "https://sencillito.com/documents/61641/7633903/abastible-granel-rut-gas-pagar-en-linea-sencillito/8add9790-be67-0888-3745-26961ab0dbdd" },
+                        { id: "1803", nombre: "Abastible Medidor", utilityNumber: "4318", utilityVersion: "1", campo: "NUMERO CLIENTE", logo: "https://sencillito.com/documents/61641/7633968/abastible-medidor-gas-pagar-en-linea-sencillito/172f737b-d311-c31a-0ddd-99774fe4911e" }
+                    ]
+                },
+                {
+                    id: "5306", nombre: "Energas", utilityNumber: "4217", utilityVersion: "1",
+                    campo: "NUMERO DE CLIENTE",
+                    logo: "https://sencillito.com/documents/61641/28072772/Energas_logo_549/ab7abd98-789d-6b1e-0805-1dc402fd1530",
+                    hijos: []
+                },
+                {
+                    id: "556", nombre: "Gasco", utilityNumber: "4518", utilityVersion: "1",
+                    campo: "NUMERO DE SERVICIO",
+                    logo: "https://sencillito.com/documents/61641/7842457/gasco-gas-pagar-en-linea-sencillito/1f6f88b8-fb92-b6f3-3b65-3c2b9bb307ff",
+                    hijos: []
+                },
+                {
+                    id: "5305", nombre: "GasValpo", utilityNumber: "4216", utilityVersion: "1",
+                    campo: "NUMERO DE CLIENTE",
+                    logo: "https://sencillito.com/documents/61641/28072748/pagar_gas_valpo/4c0c3fa0-83e6-302e-df60-e05519b35ecf",
+                    hijos: []
+                },
+                {
+                    id: "1218", nombre: "Lipigas", utilityNumber: "10018", utilityVersion: "1",
+                    campo: "NUMERO DE RUT",
+                    logo: "https://sencillito.com/documents/61641/7842554/lipigas-gas-pagar-en-linea-sencillito/04d11c60-cb74-81a7-064e-8bda8fa9e7c7",
+                    hijos: [
+                        { id: "553", nombre: "Lipigas Granel", utilityNumber: "4422", utilityVersion: "1", campo: "NUMERO DE RUT", logo: "https://sencillito.com/documents/61641/7842538/lipigas-granel-gas-pagar-en-linea-sencillito/8f3a246a-2259-a7fd-9fee-80c3354d4603" },
+                        { id: "555", nombre: "Lipigas Medidor", utilityNumber: "4425", utilityVersion: "1", campo: "NUMERO DE CLIENTE", logo: "https://sencillito.com/documents/61641/7842579/lipigas-medidor-gas-pagar-en-linea-sencillito/620811e5-fc8b-a972-e2b5-b6647172c6a5" }
+                    ]
+                },
+                {
+                    id: "547", nombre: "Metrogas", utilityNumber: "4015", utilityVersion: "1",
+                    campo: "CUENTA CONTRATO",
+                    logo: "https://sencillito.com/documents/61641/7842497/metrogas-gas-pagar-en-linea-sencillito/36f1578d-04f1-2346-dce2-819ce2c56e4c",
+                    hijos: []
+                }
+            ]
+        };
+
+        const CAMPOS = {
+            'NUMERO DE RUT':         { label:'NÚMERO DE RUT',         placeholder:'INGRESA TU RUT (Ej: 12345678K)', corto:'RUT' },
+            'NUMERO DE CLIENTE':     { label:'NÚMERO DE CLIENTE',     placeholder:'INGRESA TU N° DE CLIENTE',         corto:'N° cliente' },
+            'NUMERO DE SERVICIO':    { label:'NÚMERO DE SERVICIO',    placeholder:'INGRESA TU N° DE SERVICIO',        corto:'N° servicio' },
+            'NUMERO DE DOCUMENTO':   { label:'NÚMERO DE DOCUMENTO',   placeholder:'INGRESA TU N° DE DOCUMENTO',       corto:'N° documento' },
+            'CUENTA CONTRATO':       { label:'CUENTA CONTRATO',       placeholder:'INGRESA TU CUENTA CONTRATO',       corto:'N° contrato' }
+        };
+
+        let empresaActual = null;
+        let padreActual   = null;
+
+        const vistaCategorias    = document.getElementById('vista-categorias');
+        const vistaSubcategorias = document.getElementById('vista-subcategorias');
+        const vistaPago          = document.getElementById('vista-pago');
+        const vistaDeuda         = document.getElementById('vista-deuda');
+
+        const bcGas     = document.getElementById('bc-gas');
+        const bcSubcat  = document.getElementById('bc-subcat');
+        const bcEmpresa = document.getElementById('bc-empresa');
+
+        function renderGridPrincipal() {
+            const grid = document.getElementById('grid-principal');
+            grid.innerHTML = '';
+            INDUSTRIA.convenios.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'card-empresa';
+                card.innerHTML = `
+                    ${c.hijos.length ? '<span class="badge-sub">' + c.hijos.length + ' opciones</span>' : ''}
+                    <img src="${c.logo}" alt="${c.nombre}">
+                    <p>${c.nombre}</p>
+                `;
+                card.addEventListener('click', () => {
+                    if (c.hijos.length > 0) {
+                        abrirSubcategorias(c);
+                    } else {
+                        seleccionarConvenio(c, c);
+                    }
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function abrirSubcategorias(padre) {
+            padreActual = padre;
+            vistaCategorias.style.display = 'none';
+            vistaPago.style.display = 'none';
+            vistaDeuda.style.display = 'none';
+            vistaSubcategorias.style.display = 'block';
+
+            document.getElementById('subcat-icon').src = padre.logo;
+            document.getElementById('subcat-title').textContent = padre.nombre;
+            document.getElementById('subcat-desc').textContent = 'Selecciona el tipo de cuenta de ' + padre.nombre + ' que quieres pagar.';
+
+            const grid = document.getElementById('grid-sub');
+            grid.innerHTML = '';
+            padre.hijos.forEach(h => {
+                const card = document.createElement('div');
+                card.className = 'card-empresa';
+                card.innerHTML = `
+                    <img src="${h.logo}" alt="${h.nombre}">
+                    <p>${h.nombre}</p>
+                `;
+                card.addEventListener('click', () => seleccionarConvenio(h, padre));
+                grid.appendChild(card);
+            });
+
+            bcSubcat.textContent = ' > ' + padre.nombre;
+            bcSubcat.className = 'clickable';
+            bcSubcat.onclick = volverACategorias;
+            bcEmpresa.textContent = '';
+
+            window.scrollTo({ top:0, behavior:'smooth' });
+        }
+
+        function seleccionarConvenio(convenio, padre) {
+            empresaActual = convenio;
+            padreActual   = padre || convenio;
+
+            vistaCategorias.style.display = 'none';
+            vistaSubcategorias.style.display = 'none';
+            vistaPago.style.display = 'block';
+            vistaDeuda.style.display = 'none';
+
+            document.getElementById('titulo-sidebar').textContent = convenio.nombre;
+            document.getElementById('logo-sidebar').src = convenio.logo;
+
+            const meta = CAMPOS[convenio.campo] || CAMPOS['NUMERO DE RUT'];
+            document.getElementById('label-referencia').textContent = meta.label;
+            const inputRef = document.getElementById('input-referencia');
+            inputRef.placeholder = meta.placeholder;
+            inputRef.value = '';
+
+            document.querySelectorAll('.nombre-empresa-paso').forEach(el => el.textContent = convenio.nombre);
+            document.querySelectorAll('.campo-paso').forEach(el => el.textContent = meta.corto);
+
+            if (padre && padre.id !== convenio.id) {
+                bcSubcat.textContent = ' > ' + padre.nombre;
+                bcSubcat.className = 'clickable';
+                bcSubcat.onclick = volverACategorias;
+            } else {
+                bcSubcat.textContent = '';
+            }
+            bcEmpresa.textContent = ' > ' + convenio.nombre;
+            bcEmpresa.style.color = '#777';
+            bcEmpresa.style.fontWeight = 'normal';
+
+            window.scrollTo({ top:0, behavior:'smooth' });
+        }
+
+        async function consultarDeuda(event) {
+            event.preventDefault();
+
+            const accountReference = document.getElementById('input-referencia').value.trim();
+            if (!accountReference) return;
+
+            document.getElementById('loader-consulta').style.display = 'block';
+            const btn = document.getElementById('btn-consultar');
+            btn.disabled = true;
+            btn.textContent = 'Consultando...';
+
+            try {
+                const url = `/api/consultar-deuda?accountReference=${encodeURIComponent(accountReference)}`
+                          + `&utilityNumber=${encodeURIComponent(empresaActual.utilityNumber)}`
+                          + `&utilityVersion=${encodeURIComponent(empresaActual.utilityVersion)}`
+                          + `&industriaId=${encodeURIComponent(INDUSTRIA.id)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.errorMessage) {
+                    alert("Sencillito dice: " + data.errorMessage);
+                } else if (!data.invoices || data.invoices.length === 0) {
+                    alert("El cliente no registra deuda.");
+                } else {
+                    mostrarDeudas(data.invoices);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión. Asegúrate de que el servidor backend esté corriendo.");
+            } finally {
+                document.getElementById('loader-consulta').style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = 'Consultar Deuda';
+            }
+        }
+
+        function mostrarDeudas(invoices) {
+            vistaPago.style.display = 'none';
+            vistaDeuda.style.display = 'block';
+
+            document.getElementById('titulo-sidebar-deuda').textContent = empresaActual.nombre;
+            document.getElementById('logo-sidebar-deuda').src = empresaActual.logo;
+
+            const lista = document.getElementById('lista-deudas');
+            lista.innerHTML = '';
+            document.getElementById('detalle-deuda').style.display = 'block';
+
+            invoices.sort((a,b) => b.amount - a.amount);
+
+            invoices.forEach((invoice, index) => {
+                const li = document.createElement('li');
+                li.className = 'deuda-item';
+                if (index === 0) li.classList.add('selected');
+                const montoFmt = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP' }).format(invoice.amount);
+                li.innerHTML = `
+                    <span class="deuda-monto">${montoFmt}</span>
+                    <div class="deuda-radio"></div>
+                `;
+                li.onclick = () => seleccionarDeuda(li, invoice.amount, invoice.type || 'DEUDA ACTUAL');
+                lista.appendChild(li);
+            });
+
+            if (invoices.length > 0) {
+                lista.querySelector('.deuda-item').click();
+            }
+
+            window.scrollTo({ top:0, behavior:'smooth' });
+        }
+
+        function seleccionarDeuda(elementoHtml, monto, tipo) {
+            document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
+            elementoHtml.classList.add('selected');
+            document.getElementById('detalle-tipo').textContent = tipo;
+            document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP' }).format(monto);
+        }
+
+        function pagarAhora() { alert("Redirigiendo a la pasarela de pago..."); }
+
+        function volverAFormulario() {
+            vistaDeuda.style.display = 'none';
+            vistaPago.style.display = 'block';
+            document.getElementById('input-referencia').value = '';
+        }
+
+        function volverACategorias() {
+            vistaPago.style.display = 'none';
+            vistaDeuda.style.display = 'none';
+            vistaSubcategorias.style.display = 'none';
+            vistaCategorias.style.display = 'block';
+            bcSubcat.textContent = '';
+            bcEmpresa.textContent = '';
+            padreActual = null;
+            window.scrollTo({ top:0, behavior:'smooth' });
+        }
+
+        function toggleDescripcion() {
+            const texto = document.getElementById('texto-descripcion');
+            const icono = document.getElementById('icono-flecha');
+            if (texto.style.display === 'none') { texto.style.display = 'block'; icono.textContent = '▲'; }
+            else { texto.style.display = 'none'; icono.textContent = '▼'; }
+        }
+
+        function toggleDescripcionDeuda() {
+            const texto = document.getElementById('texto-descripcion-deuda');
+            const icono = document.getElementById('icono-flecha-deuda');
+            if (texto.style.display === 'none') { texto.style.display = 'block'; icono.textContent = '▲'; }
+            else { texto.style.display = 'none'; icono.textContent = '▼'; }
+        }
+
+        document.addEventListener('DOMContentLoaded', renderGridPrincipal);
+    </script>
+</body>
+</html>
