@@ -26,17 +26,16 @@
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
-            overflow: hidden; /* Evita scroll doble en desktop */
+            overflow: hidden; 
         }
 
-        /* --- Layout Desktop (Sidebar + Contenido) --- */
         .checkout-container {
             display: flex;
             width: 100vw;
             height: 100vh;
         }
 
-        /* Sidebar (Resumen) */
+        /* --- Sidebar Desktop --- */
         .sidebar {
             width: 30vw;
             min-width: 320px;
@@ -70,8 +69,6 @@
             opacity: 0.9;
             padding: 0;
         }
-
-        .btn-volver:hover { opacity: 1; }
 
         .sidebar-title {
             font-size: 18px;
@@ -142,17 +139,13 @@
             white-space: nowrap;
         }
 
-        .sidebar-footer {
-            margin-top: 32px;
-        }
-
         .sidebar-footer img {
             max-width: 180px;
             max-height: 50px;
             object-fit: contain;
         }
 
-        /* Contenido Principal (Métodos de Pago) */
+        /* --- Contenido Principal --- */
         .main-content {
             flex: 1;
             padding: 48px 32px;
@@ -164,7 +157,7 @@
 
         .payment-container {
             width: 100%;
-            max-width: 760px; /* Más ancho para que quepan 3 columnas */
+            max-width: 760px;
             display: flex;
             flex-direction: column;
             gap: 32px;
@@ -184,10 +177,10 @@
             color: var(--text-secondary);
         }
 
-        /* Grid de Botones de Pago */
+        /* Grid de Botones */
         .payment-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 columnas en desktop */
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
         }
 
@@ -211,7 +204,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Forzar tamaño uniforme a todos los SVG */
+        /* Tamaño forzado para los SVG */
         .payment-btn > svg {
             width: 100%;
             height: 100%;
@@ -220,7 +213,7 @@
         }
 
         .payment-btn-wide {
-            grid-column: span 3; /* Ocupa las 3 columnas */
+            grid-column: span 3;
             height: 72px;
             display: flex;
             flex-direction: row;
@@ -246,43 +239,47 @@
 
         /* --- Responsive Mobile --- */
         @media (max-width: 850px) {
-            body { overflow: auto; }
+            body { overflow: auto; background: #fff; }
             .checkout-container { flex-direction: column; height: auto; }
             .sidebar { display: none; }
             
-            /* Header Mobile */
+            /* Header Mobile idéntico a la captura */
             .mobile-header {
                 background: var(--brand-bg);
                 background-attachment: fixed;
-                padding: 16px 20px;
+                padding: 12px 16px;
                 color: #fff;
                 display: flex;
                 align-items: center;
-                gap: 16px;
+                gap: 12px;
                 position: sticky;
                 top: 0;
                 z-index: 10;
             }
             .mobile-logo-container {
-                width: 48px;
-                height: 48px;
+                width: 44px;
+                height: 44px;
                 background: #fff;
                 border-radius: 6px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
+                padding: 4px;
             }
             .mobile-logo-container img {
-                max-width: 40px;
-                max-height: 40px;
+                max-width: 100%;
+                max-height: 100%;
                 object-fit: contain;
             }
             .mobile-info {
                 flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
             .mobile-info h1 {
-                font-size: 12px;
+                font-size: 13px;
                 font-weight: 500;
                 opacity: 0.9;
                 margin-bottom: 2px;
@@ -290,14 +287,16 @@
             .mobile-info .amount {
                 font-size: 20px;
                 font-weight: 600;
+                line-height: 1.1;
             }
             .mobile-items {
                 font-size: 14px;
-                font-weight: 500;
+                font-weight: 600;
                 display: flex;
                 align-items: center;
                 gap: 4px;
                 cursor: pointer;
+                margin-right: 8px;
             }
             .mobile-back {
                 background: rgba(255,255,255,0.2);
@@ -310,35 +309,40 @@
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
+                flex-shrink: 0;
             }
 
             .main-content {
-                padding: 24px 20px;
+                padding: 20px 16px;
                 align-items: stretch;
             }
-            .header-payment h1 { font-size: 20px; }
+            .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
             
-            /* 2 columnas en móvil */
+            /* Grid de 2 columnas para móvil */
             .payment-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                gap: 10px;
             }
             .payment-btn {
-                height: 64px;
+                height: 60px;
+                padding: 8px;
             }
             .payment-btn-wide {
                 grid-column: span 2;
+                height: 64px;
             }
         }
 
         @media (min-width: 851px) {
             .mobile-header { display: none; }
         }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Header Mobile (Oculto en Desktop) -->
+    <!-- Header Mobile (Solo visible en celular) -->
     <div class="mobile-header">
         <div class="mobile-logo-container">
             <img id="mobile-logo" src="" alt="Logo">
@@ -357,7 +361,7 @@
     </div>
 
     <div class="checkout-container">
-        <!-- Sidebar Desktop (Resumen) -->
+        <!-- Sidebar Desktop -->
         <aside class="sidebar">
             <div class="sidebar-top">
                 <button class="btn-volver" onclick="window.history.back()">
@@ -404,7 +408,6 @@
                     </div>
                 </div>
 
-                <!-- Grid de Botones -->
                 <div class="payment-grid">
                     <!-- Banco Estado -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
@@ -497,8 +500,7 @@
 
                 <div class="legal-footer">
                     <p>Al continuar aceptas <a href="#">Condiciones</a> & <a href="#">Privacidad</a></p>
-                    <div style="font-size: 24px; font-weight: 700; color: #ccc; letter-spacing: -1px; display: flex; align-items: center; gap: 2px;">
-                        <!-- Logo Fintoc -->
+                    <div style="font-size: 24px; font-weight: 700; color: #d1d1d1; letter-spacing: -1px; display: flex; align-items: center; gap: 2px;">
                         <span style="color: #d1d1d1;">fintoc</span>
                     </div>
                 </div>
@@ -512,66 +514,53 @@
             return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
         };
 
-        // Cargar datos del pago desde localStorage
+        // Cargar datos dinámicos
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
             if (!stored) {
-                // Si no hay datos, redirigir a index o mostrar error
                 alert("No se encontraron datos de pago. Volviendo al inicio.");
                 window.location.href = 'index.html';
                 return;
             }
 
             const data = JSON.parse(stored);
-            const montoFormateado = formatCLP(data.monto).replace('$', '').trim(); // Quitamos el $ para el formato de la imagen
+            // Formato $10.370
+            const montoFormateado = formatCLP(data.monto); 
 
-            // Llenar Sidebar Desktop
-            document.getElementById('desktop-amount').textContent = '$' + montoFormateado;
+            // Sidebar Desktop
+            document.getElementById('desktop-amount').textContent = montoFormateado;
             document.getElementById('desktop-item-img').src = data.logo;
-            document.getElementById('desktop-item-img').alt = data.empresa;
             document.getElementById('desktop-item-name').textContent = data.empresa;
-            document.getElementById('desktop-item-price').textContent = '$' + montoFormateado;
+            document.getElementById('desktop-item-price').textContent = montoFormateado;
 
-            // Llenar Header Mobile
-            document.getElementById('mobile-amount').textContent = '$' + montoFormateado;
+            // Header Mobile
+            document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
             document.getElementById('mobile-logo').alt = data.empresa;
         });
 
-        // Función lista para conectar con tu pasarela de pagos
+        // Conectar aquí tu pasarela de pagos (Fintoc, Transbank, etc.)
         function iniciarPago(institutionId, event) {
-            // 1. Obtenemos los datos del pago
             const stored = localStorage.getItem('sencillito_pago_pendiente');
             if (!stored) return;
             const data = JSON.parse(stored);
 
-            // 2. Efecto visual en el botón
             const btn = event.currentTarget;
             const originalContent = btn.innerHTML;
+            
+            // Efecto de carga
             btn.disabled = true;
             btn.style.opacity = '0.7';
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
             
-            // Añadir animación de giro al CSS si no existe
-            if (!document.getElementById('spin-style')) {
-                const style = document.createElement('style');
-                style.id = 'spin-style';
-                style.innerHTML = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-                document.head.appendChild(style);
-            }
-
-            // 3. AQUÍ CONECTAS TU PASARELA (Fintoc, Transbank, etc.)
             console.log(`Iniciando pago para ${data.empresa} por $${data.monto} con banco: ${institutionId}`);
             
             setTimeout(() => {
-                // Simulamos que el widget se abrió y cerramos el loader
-                alert(`Conectando con la pasarela para el banco: ${institutionId}\n\n(Reemplaza este alert con el código de Fintoc)`);
-                
-                // Restaurar botón
+                alert(`Conectando con la pasarela para el banco: ${institutionId}\n\n(Reemplaza este alert con el SDK de Fintoc)`);
                 btn.disabled = false;
                 btn.style.opacity = '1';
                 btn.innerHTML = originalContent;
-            }, 800);
+            }, 1000);
         }
     </script>
 </body>
