@@ -424,7 +424,7 @@
             document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP' }).format(monto);
         }
 
-        function pagarAhora() { alert("Redirigiendo a la pasarela de pago..."); }
+        function pagarAhora() { window.location.href = 'pago.html'; }
 
         function volverAFormulario() {
             vistaDeuda.style.display = 'none';
