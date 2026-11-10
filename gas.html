@@ -354,6 +354,7 @@
 
         let empresaActual = null;
         let padreActual   = null;
+        let deudaSeleccionada = null; // NUEVA VARIABLE
 
         const vistaCategorias    = document.getElementById('vista-categorias');
         const vistaSubcategorias = document.getElementById('vista-subcategorias');
@@ -421,6 +422,7 @@
         function seleccionarConvenio(convenio, padre) {
             empresaActual = convenio;
             padreActual   = padre || convenio;
+            deudaSeleccionada = null; // Reseteamos
 
             vistaCategorias.style.display = 'none';
             vistaSubcategorias.style.display = 'none';
@@ -527,11 +529,31 @@
         function seleccionarDeuda(elementoHtml, monto, tipo) {
             document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
             elementoHtml.classList.add('selected');
+            
+            // GUARDAMOS LA DEUDA
+            deudaSeleccionada = { monto: monto, tipo: tipo };
+
             document.getElementById('detalle-tipo').textContent = tipo;
             document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP' }).format(monto);
         }
 
-        function pagarAhora() { alert("Redirigiendo a la pasarela de pago..."); }
+        // NUEVA FUNCIÓN: Guarda en localStorage y va a pago.html
+        function pagarAhora() {
+            if (!deudaSeleccionada) {
+                alert("Por favor, selecciona una deuda primero.");
+                return;
+            }
+
+            const dataParaPago = {
+                empresa: empresaActual.nombre,
+                logo: empresaActual.logo,
+                monto: deudaSeleccionada.monto,
+                tipoDeuda: deudaSeleccionada.tipo
+            };
+
+            localStorage.setItem('sencillito_pago_pendiente', JSON.stringify(dataParaPago));
+            window.location.href = 'pago.html';
+        }
 
         function volverAFormulario() {
             vistaDeuda.style.display = 'none';
