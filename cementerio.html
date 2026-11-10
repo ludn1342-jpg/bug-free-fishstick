@@ -307,6 +307,7 @@
     <!-- LÓGICA DE NAVEGACIÓN Y CONSULTA -->
     <script>
         let empresaActual = { nombre: '', logo: '', utilityNumber: '', utilityVersion: '', industriaId: '' };
+        let deudaSeleccionada = null; // NUEVA VARIABLE para guardar el monto
         
         const vistaCategorias = document.getElementById('vista-categorias');
         const vistaPago = document.getElementById('vista-pago');
@@ -315,6 +316,7 @@
 
         function seleccionarEmpresa(nombre, logoUrl, utilityNumber, utilityVersion, industriaId) {
             empresaActual = { nombre, logo: logoUrl, utilityNumber, utilityVersion, industriaId };
+            deudaSeleccionada = null; // Limpiamos al cambiar de empresa
             
             vistaCategorias.style.display = 'none';
             vistaPago.style.display = 'block';
@@ -323,7 +325,7 @@
             document.getElementById('titulo-sidebar').textContent = nombre;
             document.getElementById('logo-sidebar').src = logoUrl;
             
-            // Personalizar etiqueta según convenio (algunos piden RUT, otros Contrato, otros N° Cliente)
+            // Personalizar etiqueta según convenio
             const labelInput = document.getElementById('label-referencia');
             const inputRef = document.getElementById('input-referencia');
             
@@ -358,7 +360,6 @@
             document.getElementById('btn-consultar').textContent = 'Consultando...';
 
             try {
-                // Ruta relativa: evita bloqueos de Chrome en celular y funciona en producción
                 const urlProxy = `/api/consultar-deuda?accountReference=${accountReference}&utilityNumber=${empresaActual.utilityNumber}&utilityVersion=${empresaActual.utilityVersion}&industriaId=${empresaActual.industriaId}`;
                 
                 const response = await fetch(urlProxy);
@@ -421,14 +422,31 @@
         function seleccionarDeuda(elementoHtml, monto, tipo) {
             document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
             elementoHtml.classList.add('selected');
+            
+            // GUARDAMOS LA DEUDA
+            deudaSeleccionada = { monto: monto, tipo: tipo };
 
             document.getElementById('detalle-deuda').style.display = 'block';
             document.getElementById('detalle-tipo').textContent = tipo;
             document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(monto);
         }
 
+        // NUEVA FUNCIÓN: Guarda en localStorage y va a pago.html
         function pagarAhora() {
-            alert("Redirigiendo a la pasarela de pago...");
+            if (!deudaSeleccionada) {
+                alert("Por favor, selecciona una deuda primero.");
+                return;
+            }
+
+            const dataParaPago = {
+                empresa: empresaActual.nombre,
+                logo: empresaActual.logo,
+                monto: deudaSeleccionada.monto,
+                tipoDeuda: deudaSeleccionada.tipo
+            };
+
+            localStorage.setItem('sencillito_pago_pendiente', JSON.stringify(dataParaPago));
+            window.location.href = 'pago.html';
         }
 
         function volverAFormulario() {
