@@ -358,6 +358,7 @@
             document.getElementById('btn-consultar').textContent = 'Consultando...';
 
             try {
+                // Ruta relativa: evita bloqueos de Chrome en celular y funciona en producción
                 const urlProxy = `/api/consultar-deuda?accountReference=${accountReference}&utilityNumber=${empresaActual.utilityNumber}&utilityVersion=${empresaActual.utilityVersion}&industriaId=${empresaActual.industriaId}`;
                 
                 const response = await fetch(urlProxy);
@@ -372,7 +373,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error de conexión. Asegúrate de que el servidor backend esté corriendo.");
+                alert("Error de conexión. Intenta nuevamente.");
             } finally {
                 document.getElementById('loader-consulta').style.display = 'none';
                 document.getElementById('btn-consultar').disabled = false;
