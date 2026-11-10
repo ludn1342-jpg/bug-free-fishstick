@@ -324,6 +324,7 @@
     <!-- LÓGICA DE NAVEGACIÓN Y CONSULTA -->
     <script>
         let empresaActual = { nombre: '', logo: '', utilityNumber: '', utilityVersion: '', industriaId: '' };
+        let deudaSeleccionada = null; // NUEVA VARIABLE para guardar el monto y tipo
         
         const vistaCategorias = document.getElementById('vista-categorias');
         const vistaPago = document.getElementById('vista-pago');
@@ -332,6 +333,7 @@
 
         function seleccionarEmpresa(nombre, logoUrl, utilityNumber, utilityVersion, industriaId) {
             empresaActual = { nombre, logo: logoUrl, utilityNumber, utilityVersion, industriaId };
+            deudaSeleccionada = null; // Limpiamos la deuda al cambiar de empresa
             
             vistaCategorias.style.display = 'none';
             vistaPago.style.display = 'block';
@@ -417,50 +419,4 @@
                 primerItem.click();
             }
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function seleccionarDeuda(elementoHtml, monto, tipo) {
-            document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
-            elementoHtml.classList.add('selected');
-
-            document.getElementById('detalle-deuda').style.display = 'block';
-            document.getElementById('detalle-tipo').textContent = tipo;
-            document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(monto);
-        }
-
-        function pagarAhora() {
-            alert("Redirigiendo a la pasarela de pago...");
-        }
-
-        function volverAFormulario() {
-            vistaDeuda.style.display = 'none';
-            vistaPago.style.display = 'block';
-            document.getElementById('input-referencia').value = '';
-        }
-
-        function volverACategorias() {
-            vistaPago.style.display = 'none';
-            vistaDeuda.style.display = 'none';
-            vistaCategorias.style.display = 'block';
-            breadcrumbEmpresa.textContent = '';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function toggleDescripcion() {
-            const texto = document.getElementById('texto-descripcion');
-            const icono = document.getElementById('icono-flecha');
-            if (texto.style.display === 'none') { texto.style.display = 'block'; icono.textContent = '▲'; }
-            else { texto.style.display = 'none'; icono.textContent = '▼'; }
-        }
-
-        function toggleDescripcionDeuda() {
-            const texto = document.getElementById('texto-descripcion-deuda');
-            const icono = document.getElementById('icono-flecha-deuda');
-            if (texto.style.display === 'none') { texto.style.display = 'block'; icono.textContent = '▲'; }
-            else { texto.style.display = 'none'; icono.textContent = '▼'; }
-        }
-    </script>
-
-</body>
-</html>
+            window.scrollTo({ top: 0, behavior: 'smooth
