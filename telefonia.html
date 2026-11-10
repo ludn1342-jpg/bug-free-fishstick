@@ -521,6 +521,7 @@
             btn.textContent = 'Consultando...';
 
             try {
+                // Ruta relativa para producción y móviles
                 const url = `/api/consultar-deuda?accountReference=${encodeURIComponent(accountReference)}`
                           + `&utilityNumber=${encodeURIComponent(empresaActual.utilityNumber)}`
                           + `&utilityVersion=${encodeURIComponent(empresaActual.utilityVersion)}`
@@ -538,7 +539,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error de conexión. Asegúrate de que el servidor backend esté corriendo.");
+                alert("Error de conexión. Intenta nuevamente.");
             } finally {
                 document.getElementById('loader-consulta').style.display = 'none';
                 btn.disabled = false;
