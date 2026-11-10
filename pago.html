@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -39,7 +38,6 @@
             height: 100vh;
         }
 
-        /* Sidebar PC */
         .sidebar {
             width: 30vw;
             min-width: 320px;
@@ -117,7 +115,6 @@
             font-weight: 600;
         }
 
-        /* Contenido Principal PC */
         .main-content {
             flex: 1;
             padding: 48px 32px;
@@ -149,7 +146,6 @@
             color: var(--text-secondary);
         }
 
-        /* Grilla PC (3 columnas) */
         .payment-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -175,7 +171,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* Imágenes de los bancos */
         .bank-logo {
             max-width: 100%;
             max-height: 100%;
@@ -229,7 +224,6 @@
             min-height: 100vh;
         }
 
-        /* Barra azul superior celular */
         .mobile-header {
             background: var(--brand-bg);
             padding: 12px 16px;
@@ -295,7 +289,6 @@
             cursor: pointer;
         }
 
-        /* Contenido Celular */
         .mobile-main {
             padding: 20px 16px;
             flex: 1;
@@ -306,7 +299,6 @@
             margin-bottom: 4px;
         }
 
-        /* Grilla Celular (2 columnas) */
         .mobile-main .payment-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
@@ -323,7 +315,6 @@
             height: 60px;
         }
 
-        /* Responsive Switch */
         @media (max-width: 850px) {
             body { overflow: auto; }
             .desktop-layout { display: none; }
@@ -373,50 +364,61 @@
                     </div>
                 </div>
 
-                <!-- Botones PC -->
                 <div class="payment-grid">
+                    <!-- Banco Estado -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Banco_Estado_Logo.svg/320px-Banco_Estado_Logo.svg.png" class="bank-logo" alt="Banco Estado">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_estado.svg" class="bank-logo" alt="Banco Estado">
                     </button>
+                    <!-- Banco Falabella -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Banco_Falabella_Logo.svg/320px-Banco_Falabella_Logo.svg.png" class="bank-logo" alt="Banco Falabella">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_falabella.svg" class="bank-logo" alt="Banco Falabella">
                     </button>
+                    <!-- Banco Santander -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Banco_Santander_Logotipo.svg/320px-Banco_Santander_Logotipo.svg.png" class="bank-logo" alt="Banco Santander">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_santander.svg" class="bank-logo" alt="Banco Santander">
                     </button>
+                    <!-- Banco de Chile -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Banco_de_Chile_Logo.svg/320px-Banco_de_Chile_Logo.svg.png" class="bank-logo" alt="Banco de Chile">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_de_chile.svg" class="bank-logo" alt="Banco de Chile">
                     </button>
+                    <!-- Banco BCI -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Banco_BCI_Logo.svg/320px-Banco_BCI_Logo.svg.png" class="bank-logo" alt="Banco BCI">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_bci.svg" class="bank-logo" alt="Banco BCI">
                     </button>
+                    <!-- Banco Scotiabank -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Scotiabank_Logo.svg/320px-Scotiabank_Logo.svg.png" class="bank-logo" alt="Banco Scotiabank">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_scotiabank.svg" class="bank-logo" alt="Banco Scotiabank">
                     </button>
+                    <!-- Banco Itaú -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Banco_Ita%C3%BA_Logo.svg/320px-Banco_Ita%C3%BA_Logo.svg.png" class="bank-logo" alt="Banco Itaú">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_itau.svg" class="bank-logo" alt="Banco Itaú">
                     </button>
+                    <!-- Banco BICE -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Banco_BICE_Logo.svg/320px-Banco_BICE_Logo.svg.png" class="bank-logo" alt="Banco BICE">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_bice.svg" class="bank-logo" alt="Banco BICE">
                     </button>
+                    <!-- Banco Ripley -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Banco_Ripley_Logo.svg/320px-Banco_Ripley_Logo.svg.png" class="bank-logo" alt="Banco Ripley">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_ripley.svg" class="bank-logo" alt="Banco Ripley">
                     </button>
+                    <!-- MACH -->
                     <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                         <div class="btn-app-text">
                             <span>Paga con tu App</span>
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/MACH_Logo.svg/320px-MACH_Logo.svg.png" style="height: 24px;" alt="MACH">
+                            <img src="https://assets.fintoc.com/logos/banks/cl_mach.svg" style="height: 24px;" alt="MACH">
                         </div>
                     </button>
+                    <!-- Tarjeta Hites -->
                     <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Hites_Logo.svg/320px-Hites_Logo.svg.png" class="bank-logo" alt="Hites">
+                        <img src="https://assets.fintoc.com/logos/banks/hites.svg" class="bank-logo" alt="Hites">
                     </button>
+                    <!-- Paga con tu banco -->
                     <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                         <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                         <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Logo_Coopeuch.svg/64px-Logo_Coopeuch.svg.png" style="height: 24px;" alt="Coopeuch">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Tenpo_Logo.svg/64px-Tenpo_Logo.svg.png" style="height: 24px;" alt="Tenpo">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Mercado_Pago_Logo.svg/64px-Mercado_Pago_Logo.svg.png" style="height: 24px;" alt="Mercado Pago">
+                            <img src="https://assets.fintoc.com/logos/banks/cl_banco_coopeuch.svg" style="height: 24px;" alt="Coopeuch">
+                            <img src="https://assets.fintoc.com/logos/banks/cl_tenpo.svg" style="height: 24px;" alt="Tenpo">
+                            <img src="https://assets.fintoc.com/logos/banks/cl_mercado_pago.svg" style="height: 24px;" alt="Mercado Pago">
                             <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                         </div>
                     </button>
@@ -460,50 +462,49 @@
                 </div>
             </div>
 
-            <!-- Botones Móvil -->
             <div class="payment-grid">
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Banco_Estado_Logo.svg/320px-Banco_Estado_Logo.svg.png" class="bank-logo" alt="Banco Estado">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_estado.svg" class="bank-logo" alt="Banco Estado">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Banco_Falabella_Logo.svg/320px-Banco_Falabella_Logo.svg.png" class="bank-logo" alt="Banco Falabella">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_falabella.svg" class="bank-logo" alt="Banco Falabella">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Banco_Santander_Logotipo.svg/320px-Banco_Santander_Logotipo.svg.png" class="bank-logo" alt="Banco Santander">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_santander.svg" class="bank-logo" alt="Banco Santander">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Banco_de_Chile_Logo.svg/320px-Banco_de_Chile_Logo.svg.png" class="bank-logo" alt="Banco de Chile">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_de_chile.svg" class="bank-logo" alt="Banco de Chile">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Banco_BCI_Logo.svg/320px-Banco_BCI_Logo.svg.png" class="bank-logo" alt="Banco BCI">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_bci.svg" class="bank-logo" alt="Banco BCI">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Scotiabank_Logo.svg/320px-Scotiabank_Logo.svg.png" class="bank-logo" alt="Banco Scotiabank">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_scotiabank.svg" class="bank-logo" alt="Banco Scotiabank">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Banco_Ita%C3%BA_Logo.svg/320px-Banco_Ita%C3%BA_Logo.svg.png" class="bank-logo" alt="Banco Itaú">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_itau.svg" class="bank-logo" alt="Banco Itaú">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Banco_BICE_Logo.svg/320px-Banco_BICE_Logo.svg.png" class="bank-logo" alt="Banco BICE">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_bice.svg" class="bank-logo" alt="Banco BICE">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Banco_Ripley_Logo.svg/320px-Banco_Ripley_Logo.svg.png" class="bank-logo" alt="Banco Ripley">
+                    <img src="https://assets.fintoc.com/logos/banks/cl_banco_ripley.svg" class="bank-logo" alt="Banco Ripley">
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                     <div class="btn-app-text">
                         <span>Paga con tu App</span>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/MACH_Logo.svg/320px-MACH_Logo.svg.png" style="height: 24px;" alt="MACH">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_mach.svg" style="height: 24px;" alt="MACH">
                     </div>
                 </button>
                 <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Hites_Logo.svg/320px-Hites_Logo.svg.png" class="bank-logo" alt="Hites">
+                    <img src="https://assets.fintoc.com/logos/banks/hites.svg" class="bank-logo" alt="Hites">
                 </button>
                 <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                     <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                     <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Logo_Coopeuch.svg/64px-Logo_Coopeuch.svg.png" style="height: 24px;" alt="Coopeuch">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Tenpo_Logo.svg/64px-Tenpo_Logo.svg.png" style="height: 24px;" alt="Tenpo">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Mercado_Pago_Logo.svg/64px-Mercado_Pago_Logo.svg.png" style="height: 24px;" alt="Mercado Pago">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_banco_coopeuch.svg" style="height: 24px;" alt="Coopeuch">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_tenpo.svg" style="height: 24px;" alt="Tenpo">
+                        <img src="https://assets.fintoc.com/logos/banks/cl_mercado_pago.svg" style="height: 24px;" alt="Mercado Pago">
                         <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                     </div>
                 </button>
@@ -517,7 +518,6 @@
     </div>
 
     <script>
-        // Formatear moneda CLP
         const formatCLP = (amount) => {
             return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
         };
@@ -535,16 +535,15 @@
 
             // Llenar PC
             document.getElementById('pc-amount').textContent = montoFormateado;
-            document.getElementById('pc-item-img').src = data.logo;
+            document.getElementById('pc-item-img').src = data.logo; // Consume el logo dinámico (Aguas, Luz, etc.)
             document.getElementById('pc-item-name').textContent = data.empresa;
             document.getElementById('pc-item-price').textContent = montoFormateado;
 
             // Llenar Mobile
             document.getElementById('mobile-amount').textContent = montoFormateado;
-            document.getElementById('mobile-logo').src = data.logo;
+            document.getElementById('mobile-logo').src = data.logo; // Consume el logo dinámico
         });
 
-        // Función para conectar la pasarela
         function iniciarPago(institutionId, event) {
             const btn = event.currentTarget;
             const originalContent = btn.innerHTML;
@@ -553,7 +552,6 @@
             btn.style.opacity = '0.7';
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
             
-            // Aquí conectas Fintoc o tu pasarela
             console.log(`Iniciando pago con banco: ${institutionId}`);
             
             setTimeout(() => {
