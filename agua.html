@@ -387,6 +387,7 @@
     <script>
         // Variables globales para guardar el estado
         let empresaActual = { nombre: '', logo: '', utilityNumber: '', utilityVersion: '', industriaId: '' };
+        let deudaSeleccionada = null; // NUEVA VARIABLE: guarda la deuda elegida
         
         const vistaCategorias = document.getElementById('vista-categorias');
         const vistaPago = document.getElementById('vista-pago');
@@ -396,6 +397,7 @@
         // Función para seleccionar empresa desde la grilla
         function seleccionarEmpresa(nombre, logoUrl, utilityNumber, utilityVersion, industriaId) {
             empresaActual = { nombre, logo: logoUrl, utilityNumber, utilityVersion, industriaId };
+            deudaSeleccionada = null; // Reseteamos al cambiar de empresa
             
             vistaCategorias.style.display = 'none';
             vistaPago.style.display = 'block';
@@ -404,7 +406,6 @@
             document.getElementById('titulo-sidebar').textContent = nombre;
             document.getElementById('logo-sidebar').src = logoUrl;
             
-            // Actualizar textos de los pasos
             document.querySelectorAll('.nombre-empresa-paso').forEach(el => el.textContent = nombre);
 
             breadcrumbEmpresa.textContent = `> ${nombre}`;
@@ -414,20 +415,18 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Función para consultar la deuda (CORREGIDA PARA PRODUCCIÓN Y CELULARES)
+        // Función para consultar la deuda
         async function consultarDeuda(event) {
-            event.preventDefault(); // Evita que la página se recargue
+            event.preventDefault();
             
             const accountReference = document.getElementById('input-referencia').value;
             if (!accountReference) return;
 
-            // Mostrar loader y deshabilitar botón
             document.getElementById('loader-consulta').style.display = 'block';
             document.getElementById('btn-consultar').disabled = true;
             document.getElementById('btn-consultar').textContent = 'Consultando...';
 
             try {
-                // CORRECCIÓN: Usar ruta relativa para que funcione en Render y no pida permisos.
                 const urlProxy = `/api/consultar-deuda?accountReference=${accountReference}&utilityNumber=${empresaActual.utilityNumber}&utilityVersion=${empresaActual.utilityVersion}&industriaId=${empresaActual.industriaId}`;
                 
                 const response = await fetch(urlProxy);
@@ -436,14 +435,12 @@
                 if (data.error || data.errorMessage === "Cliente no registra deuda" || !data.invoices || data.invoices.length === 0) {
                     alert(data.errorMessage || data.error || "El cliente no registra deuda o el número es incorrecto.");
                 } else {
-                    // Si hay deudas, mostrar la vista de selección
                     mostrarDeudas(data.invoices);
                 }
             } catch (error) {
                 console.error(error);
                 alert("Error de conexión. Intenta nuevamente.");
             } finally {
-                // Ocultar loader y restaurar botón
                 document.getElementById('loader-consulta').style.display = 'none';
                 document.getElementById('btn-consultar').disabled = false;
                 document.getElementById('btn-consultar').textContent = 'Consultar Deuda';
@@ -459,18 +456,16 @@
             document.getElementById('logo-sidebar-deuda').src = empresaActual.logo;
 
             const lista = document.getElementById('lista-deudas');
-            lista.innerHTML = ''; // Limpiar lista
+            lista.innerHTML = '';
             document.getElementById('detalle-deuda').style.display = 'none';
 
-            // Ordenar deudas de mayor a menor monto (opcional)
             invoices.sort((a, b) => b.amount - a.amount);
 
             invoices.forEach((invoice, index) => {
                 const li = document.createElement('li');
                 li.className = 'deuda-item';
-                if(index === 0) li.classList.add('selected'); // Seleccionar la primera por defecto
+                if(index === 0) li.classList.add('selected');
                 
-                // Formatear monto a moneda chilena
                 const montoFormateado = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(invoice.amount);
 
                 li.innerHTML = `
@@ -482,7 +477,6 @@
                 lista.appendChild(li);
             });
 
-            // Seleccionar la primera automáticamente
             if(invoices.length > 0) {
                 const primerItem = lista.querySelector('.deuda-item');
                 primerItem.click();
@@ -493,21 +487,37 @@
 
         // Función para seleccionar una deuda específica
         function seleccionarDeuda(elementoHtml, monto, tipo) {
-            // Quitar selección de todos
             document.querySelectorAll('.deuda-item').forEach(el => el.classList.remove('selected'));
-            // Añadir selección al clickeado
             elementoHtml.classList.add('selected');
 
-            // Mostrar detalle
+            // GUARDAMOS LA DEUDA SELECCIONADA EN LA VARIABLE GLOBAL
+            deudaSeleccionada = { monto: monto, tipo: tipo };
+
             document.getElementById('detalle-deuda').style.display = 'block';
             document.getElementById('detalle-tipo').textContent = tipo;
             document.getElementById('detalle-monto').textContent = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(monto);
         }
 
-        // Funciones de navegación
+        // Función de navegación (GUARDA EN LOCALSTORAGE Y REDIRIGE)
         function pagarAhora() {
-            alert("Redirigiendo a la pasarela de pago...");
-            // Aquí iría la lógica real para agregar al carro y redirigir
+            if (!deudaSeleccionada) {
+                alert("Por favor, selecciona una deuda primero.");
+                return;
+            }
+
+            // Estructura de datos a guardar
+            const dataParaPago = {
+                empresa: empresaActual.nombre,
+                logo: empresaActual.logo,
+                monto: deudaSeleccionada.monto,
+                tipoDeuda: deudaSeleccionada.tipo
+            };
+
+            // Guardar en el localStorage del navegador
+            localStorage.setItem('sencillito_pago_pendiente', JSON.stringify(dataParaPago));
+
+            // Redirigir a la página de pago
+            window.location.href = 'pago.html';
         }
 
         function volverAFormulario() {
