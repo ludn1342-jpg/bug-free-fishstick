@@ -19,7 +19,7 @@
 
         /* --- PC Layout --- */
         .desktop-layout { display: flex; width: 100vw; height: 100vh; }
-        
+
         .sidebar { width: 30vw; min-width: 320px; background: var(--brand-bg); background-attachment: fixed; padding: 56px 48px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
         .btn-volver { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 32px; opacity: 0.9; }
         .sidebar-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
@@ -37,18 +37,18 @@
         .secure-text { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary); }
 
         .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        
+
         /* Botones PC */
-        .payment-btn { 
-            background: #fff; border: 1px solid var(--border-color); border-radius: 6px; 
-            height: 72px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: all 0.2s; padding: 10px; 
+        .payment-btn {
+            background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
+            height: 72px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; padding: 10px;
         }
         .payment-btn:hover { border-color: #ccc; background-color: var(--bg-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
+
         /* REGLA MAESTRA PC */
         .payment-btn > img { height: 40px; width: auto; max-width: 100%; object-fit: contain; }
-        
+
         .payment-btn-wide { grid-column: span 3; height: 72px; display: flex; flex-direction: row; gap: 12px; }
         .btn-app-text { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 100%; }
         .btn-app-text span { font-size: 11px; font-weight: 500; color: #333; line-height: 1; }
@@ -70,15 +70,15 @@
 
         .mobile-main { padding: 20px 16px; flex: 1; }
         .mobile-main .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
-        
+
         /* Mobile Grid */
         .mobile-main .payment-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         .mobile-main .payment-btn { height: 60px; padding: 8px; }
-        
+
         /* REGLA MAESTRA MÓVIL */
         .mobile-main .payment-btn > img { height: 32px; width: auto; max-width: 100%; object-fit: contain; }
         .mobile-main .btn-app-text img { height: 18px; }
-        
+
         .mobile-main .payment-btn-wide { grid-column: span 2; height: 64px; }
 
         @media (max-width: 850px) {
@@ -86,7 +86,7 @@
             .desktop-layout { display: none; }
             .mobile-layout { display: flex; }
         }
-        
+
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -314,20 +314,57 @@
             document.getElementById('mobile-logo').src = data.logo;
         });
 
-        function iniciarPago(institutionId, event) {
+        async function iniciarPago(institutionId, event) {
             const btn = event.currentTarget;
             const originalContent = btn.innerHTML;
-            
+
+            // Obtener datos del pago desde localStorage
+            const stored = localStorage.getItem('sencillito_pago_pendiente');
+            if (!stored) {
+                alert("No se encontraron datos de pago.");
+                return;
+            }
+            const datosPago = JSON.parse(stored);
+
+            // Mostrar spinner en el botón
             btn.disabled = true;
             btn.style.opacity = '0.7';
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
-            
-            setTimeout(() => {
-                alert(`Conectando con la pasarela para el banco: ${institutionId}\n\n(Reemplaza este alert con el código de Fintoc)`);
+
+            // Deshabilitar todos los demás botones mientras se procesa
+            const allBtns = document.querySelectorAll('.payment-btn');
+            allBtns.forEach(b => { if (b !== btn) { b.disabled = true; b.style.opacity = '0.5'; } });
+
+            try {
+                const response = await fetch('/api/crear-pago', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        monto: datosPago.monto,
+                        descripcion: datosPago.empresa + ' - ' + institutionId,
+                        referencia: 'pago_' + institutionId + '_' + Date.now()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.checkout_url) {
+                    // Redirigir directo al checkout de Bold (página de tarjeta)
+                    window.location.href = data.checkout_url;
+                } else {
+                    throw new Error(data.error || 'Error al crear el link de pago');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar el pago: ' + error.message);
+
+                // Restaurar todos los botones
                 btn.disabled = false;
                 btn.style.opacity = '1';
                 btn.innerHTML = originalContent;
-            }, 1000);
+                allBtns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+            }
         }
     </script>
 </body>
