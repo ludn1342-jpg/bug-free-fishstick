@@ -46,7 +46,7 @@
         }
         .payment-btn:hover { border-color: #ccc; background-color: var(--bg-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
-        /* REGLA MAESTRA PC: Altura fija y ancho automático para no deformar */
+        /* REGLA MAESTRA PC */
         .payment-btn > img { height: 40px; width: auto; max-width: 100%; object-fit: contain; }
         
         .payment-btn-wide { grid-column: span 3; height: 72px; display: flex; flex-direction: row; gap: 12px; }
@@ -75,7 +75,7 @@
         .mobile-main .payment-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
         .mobile-main .payment-btn { height: 60px; padding: 8px; }
         
-        /* REGLA MAESTRA MÓVIL: Altura fija de 32px */
+        /* REGLA MAESTRA MÓVIL */
         .mobile-main .payment-btn > img { height: 32px; width: auto; max-width: 100%; object-fit: contain; }
         .mobile-main .btn-app-text img { height: 18px; }
         
@@ -129,58 +129,58 @@
                 <div class="payment-grid">
                     <!-- Banco Estado -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                        <img src="https://img.logo.dev/bancoestado.cl?token=pk_YourTokenHere" alt="Banco Estado">
+                        <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
                     </button>
                     <!-- Banco Falabella -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                        <img src="https://img.logo.dev/bancofalabella.cl?token=pk_YourTokenHere" alt="Banco Falabella">
+                        <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
                     </button>
                     <!-- Banco Santander -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                        <img src="https://img.logo.dev/santander.cl?token=pk_YourTokenHere" alt="Banco Santander">
+                        <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
                     </button>
                     <!-- Banco de Chile -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                        <img src="https://img.logo.dev/bancochile.cl?token=pk_YourTokenHere" alt="Banco de Chile">
+                        <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
                     </button>
                     <!-- Banco BCI -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                        <img src="https://img.logo.dev/bci.cl?token=pk_YourTokenHere" alt="Banco BCI">
+                        <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
                     </button>
                     <!-- Banco Scotiabank -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                        <img src="https://img.logo.dev/scotiabank.cl?token=pk_YourTokenHere" alt="Banco Scotiabank">
+                        <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
                     </button>
                     <!-- Banco Itaú -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                        <img src="https://img.logo.dev/itau.cl?token=pk_YourTokenHere" alt="Banco Itaú">
+                        <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
                     </button>
                     <!-- Banco BICE -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                        <img src="https://img.logo.dev/bice.cl?token=pk_YourTokenHere" alt="Banco BICE">
+                        <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
                     </button>
                     <!-- Banco Ripley -->
                     <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                        <img src="https://img.logo.dev/ripley.cl?token=pk_YourTokenHere" alt="Banco Ripley">
+                        <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
                     </button>
                     <!-- MACH -->
                     <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                         <div class="btn-app-text">
                             <span>Paga con tu App</span>
-                            <img src="https://img.logo.dev/machbank.cl?token=pk_YourTokenHere" alt="MACH">
+                            <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
                         </div>
                     </button>
                     <!-- Hites -->
                     <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                        <img src="https://img.logo.dev/hites.cl?token=pk_YourTokenHere" alt="Hites">
+                        <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
                     </button>
                     <!-- Paga con tu banco (Coopeuch, Tenpo, Mercado Pago) -->
                     <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                         <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                         <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                            <img src="https://img.logo.dev/coopeuch.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Coopeuch">
-                            <img src="https://img.logo.dev/tenpo.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Tenpo">
-                            <img src="https://img.logo.dev/mercadopago.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Mercado Pago">
+                            <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
+                            <img src="https://img.logo.dev/tenpo.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Tenpo">
+                            <img src="https://img.logo.dev/mercadopago.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Mercado Pago">
                             <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                         </div>
                     </button>
@@ -225,58 +225,58 @@
             <div class="payment-grid">
                 <!-- Banco Estado -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', event)">
-                    <img src="https://img.logo.dev/bancoestado.cl?token=pk_YourTokenHere" alt="Banco Estado">
+                    <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
                 </button>
                 <!-- Banco Falabella -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', event)">
-                    <img src="https://img.logo.dev/bancofalabella.cl?token=pk_YourTokenHere" alt="Banco Falabella">
+                    <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
                 </button>
                 <!-- Banco Santander -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', event)">
-                    <img src="https://img.logo.dev/santander.cl?token=pk_YourTokenHere" alt="Banco Santander">
+                    <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
                 </button>
                 <!-- Banco de Chile -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', event)">
-                    <img src="https://img.logo.dev/bancochile.cl?token=pk_YourTokenHere" alt="Banco de Chile">
+                    <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
                 </button>
                 <!-- Banco BCI -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', event)">
-                    <img src="https://img.logo.dev/bci.cl?token=pk_YourTokenHere" alt="Banco BCI">
+                    <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
                 </button>
                 <!-- Banco Scotiabank -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', event)">
-                    <img src="https://img.logo.dev/scotiabank.cl?token=pk_YourTokenHere" alt="Banco Scotiabank">
+                    <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
                 </button>
                 <!-- Banco Itaú -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', event)">
-                    <img src="https://img.logo.dev/itau.cl?token=pk_YourTokenHere" alt="Banco Itaú">
+                    <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
                 </button>
                 <!-- Banco BICE -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', event)">
-                    <img src="https://img.logo.dev/bice.cl?token=pk_YourTokenHere" alt="Banco BICE">
+                    <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
                 </button>
                 <!-- Banco Ripley -->
                 <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', event)">
-                    <img src="https://img.logo.dev/ripley.cl?token=pk_YourTokenHere" alt="Banco Ripley">
+                    <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
                 </button>
                 <!-- MACH -->
                 <button class="payment-btn" onclick="iniciarPago('cl_mach', event)">
                     <div class="btn-app-text">
                         <span>Paga con tu App</span>
-                        <img src="https://img.logo.dev/machbank.cl?token=pk_YourTokenHere" alt="MACH">
+                        <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
                     </div>
                 </button>
                 <!-- Hites -->
                 <button class="payment-btn" onclick="iniciarPago('hites', event)">
-                    <img src="https://img.logo.dev/hites.cl?token=pk_YourTokenHere" alt="Hites">
+                    <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
                 </button>
                 <!-- Paga con tu banco -->
                 <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', event)">
                     <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
                     <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                        <img src="https://img.logo.dev/coopeuch.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Coopeuch">
-                        <img src="https://img.logo.dev/tenpo.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Tenpo">
-                        <img src="https://img.logo.dev/mercadopago.cl?token=pk_YourTokenHere" style="height: 24px;" alt="Mercado Pago">
+                        <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
+                        <img src="https://img.logo.dev/tenpo.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Tenpo">
+                        <img src="https://img.logo.dev/mercadopago.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Mercado Pago">
                         <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
                     </div>
                 </button>
