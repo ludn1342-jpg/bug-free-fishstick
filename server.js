@@ -11,13 +11,12 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // --- CONFIGURACIÓN DE PROXY GEONODE ---
-// Es recomendable mover esto a variables de entorno en producción.
 const GEONODE_USER = 'geonode_PKlL1yvoTG-country-cl';
 const GEONODE_PASS = '605d224e-19b6-4baa-8107-296ee7d836f5';
 const GEONODE_HOST = '173.201.36.144';
 const GEONODE_PORT = 9000;
 
-// Endpoint para consultar la deuda
+// Endpoint para consultar la deuda (INTACTO)
 app.get('/api/consultar-deuda', async (req, res) => {
     const { accountReference, utilityNumber, utilityVersion, industriaId } = req.query;
 
@@ -26,10 +25,8 @@ app.get('/api/consultar-deuda', async (req, res) => {
     }
 
     try {
-        // URL real de Sencillito
         const urlSencillito = `https://sencillito.com/o/portal-publico/consulta-saldo/?accountReference=${accountReference}&utilityNumber=${utilityNumber}&utilityVersion=${utilityVersion}&industriaId=${industriaId}&productTypeId=null&userId=61610&session_key=null&p_auth=UsAcGwzA`;
 
-        // Petición usando el proxy residencial de Geonode
         const response = await axios.get(urlSencillito, {
             timeout: 15000,
             headers: {
@@ -47,7 +44,6 @@ app.get('/api/consultar-deuda', async (req, res) => {
             }
         });
 
-        // Devolvemos la respuesta de Sencillito a nuestro frontend
         res.json(response.data);
 
     } catch (error) {
@@ -67,13 +63,12 @@ app.get('/api/consultar-deuda', async (req, res) => {
 });
 
 // ============================================================
-// PROXY OCULTO → BACKEND DE PAGOS (otro dominio, otra app)
-// La URL vive SOLO en process.env.PAGOS_BACKEND_URL
-// El HTML del front NUNCA la conoce.
+// PROXY OCULTO → BACKEND DE PAGOS (otro dominio)
+// El HTML nunca conoce la URL del backend
 // ============================================================
 const PAGOS_BACKEND_URL = process.env.PAGOS_BACKEND_URL;
 
-// POST /api/crear-pago  →  {PAGOS_BACKEND_URL}/api/crear-pago
+// POST /api/crear-pago → {PAGOS_BACKEND_URL}/api/crear-pago
 app.post('/api/crear-pago', async (req, res) => {
     if (!PAGOS_BACKEND_URL) {
         console.error('⚠️ Falta PAGOS_BACKEND_URL en env vars del front');
@@ -92,7 +87,7 @@ app.post('/api/crear-pago', async (req, res) => {
     }
 });
 
-// GET /api/estado-pago/:id  →  {PAGOS_BACKEND_URL}/api/estado-pago/:id
+// GET /api/estado-pago/:id → {PAGOS_BACKEND_URL}/api/estado-pago/:id
 app.get('/api/estado-pago/:id', async (req, res) => {
     if (!PAGOS_BACKEND_URL) {
         return res.status(500).json({ success: false, error: 'Backend de pagos no configurado' });
