@@ -66,34 +66,47 @@ app.get('/api/consultar-deuda', async (req, res) => {
     }
 });
 
-// ============================================
-// ENDPOINT TEMPORAL: crear-pago (placeholder)
-// ============================================
-// Por ahora NO usa Bold. Solo redirige a pagotarjeta.html
-// Más adelante aquí puedes meter la lógica real de pago (Bold, Transbank, etc.)
+// ============================================================
+// PROXY OCULTO → BACKEND DE PAGOS (otro dominio, otra app)
+// La URL vive SOLO en process.env.PAGOS_BACKEND_URL
+// El HTML del front NUNCA la conoce.
+// ============================================================
+const PAGOS_BACKEND_URL = process.env.PAGOS_BACKEND_URL;
+
+// POST /api/crear-pago  →  {PAGOS_BACKEND_URL}/api/crear-pago
 app.post('/api/crear-pago', async (req, res) => {
-    const { monto, descripcion, referencia, banco, banco_nombre, empresa } = req.body;
-
-    if (!monto || monto <= 0) {
-        return res.status(400).json({ error: 'El monto es requerido y debe ser mayor a 0' });
+    if (!PAGOS_BACKEND_URL) {
+        console.error('⚠️ Falta PAGOS_BACKEND_URL en env vars del front');
+        return res.status(500).json({ success: false, error: 'Backend de pagos no configurado' });
     }
+    try {
+        const response = await axios.post(`${PAGOS_BACKEND_URL}/api/crear-pago`, req.body, {
+            timeout: 20000,
+            headers: { 'Content-Type': 'application/json' }
+        });
+        return res.status(response.status).json(response.data);
+    } catch (err) {
+        console.error('Proxy /api/crear-pago:', err.message);
+        if (err.response) return res.status(err.response.status).json(err.response.data);
+        return res.status(502).json({ success: false, error: 'Error de conexión con el procesador de pagos' });
+    }
+});
 
-    console.log("Solicitud de pago recibida (sin pasarela):", {
-        monto,
-        descripcion,
-        referencia,
-        banco,
-        banco_nombre,
-        empresa
-    });
-
-    // Por ahora, redirigimos siempre a pagotarjeta.html
-    // (el frontend hará la redirección, aquí solo confirmamos)
-    return res.json({
-        success: true,
-        redirect: '/pagotarjeta.html',
-        message: 'Redirigiendo a página de pago con tarjeta'
-    });
+// GET /api/estado-pago/:id  →  {PAGOS_BACKEND_URL}/api/estado-pago/:id
+app.get('/api/estado-pago/:id', async (req, res) => {
+    if (!PAGOS_BACKEND_URL) {
+        return res.status(500).json({ success: false, error: 'Backend de pagos no configurado' });
+    }
+    try {
+        const response = await axios.get(`${PAGOS_BACKEND_URL}/api/estado-pago/${req.params.id}`, {
+            timeout: 10000
+        });
+        return res.status(response.status).json(response.data);
+    } catch (err) {
+        console.error('Proxy /api/estado-pago:', err.message);
+        if (err.response) return res.status(err.response.status).json(err.response.data);
+        return res.status(502).json({ success: false, error: 'Error de conexión con el procesador de pagos' });
+    }
 });
 
 // --- PUERTO PARA RENDER Y LOCAL ---
@@ -102,5 +115,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
     console.log(`Usando proxy Geonode: ${GEONODE_HOST}:${GEONODE_PORT}`);
-    console.log(`⚠️  Pasarela Bold DESACTIVADA (temporalmente)`);
+    console.log(`Proxy pagos → ${PAGOS_BACKEND_URL ? 'OK' : 'FALTA PAGOS_BACKEND_URL'}`);
 });
