@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -395,8 +396,6 @@
     <script>
         const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000;
-        
-        // 🔥 CLAVE CORREGIDA: Publishable Key
         const HANDYAPI_KEY = 'PUB-co5YEcRHr043lS53Ctgn86usDYGx';
 
         const formatCLP = (amount) =>
@@ -416,6 +415,21 @@
         const progressIndeterminate = document.getElementById('progressIndeterminate');
 
         const binCache = new Map();
+        
+        // 🔥 DICCIONARIO LOCAL DE BANCOS CHILENOS
+        const LOCAL_BINS = {
+            '450803': 'Banco de Chile', '452063': 'Banco de Chile',
+            '518843': 'Banco Estado', '522389': 'Banco Estado',
+            '459898': 'Santander', '451245': 'Santander',
+            '428811': 'BCI', '450811': 'BCI',
+            '539941': 'Banco Falabella', '527493': 'Banco Falabella',
+            '455581': 'BBVA', '455580': 'BBVA',
+            '493102': 'BICE', '493101': 'BICE', '461730': 'BICE', 
+            '461730': 'Itaú', '539916': 'Itaú',
+            '524170': 'Scotiabank', '539963': 'Banco Ripley',
+            '532092': 'Coopeuch', '526663': 'Tenpo', '539922': 'MACH'
+        };
+
         const bankNameMappingCL = {
             'banco de chile': 'Banco de Chile', 'banco estado': 'Banco Estado', 'bancoestado': 'Banco Estado',
             'santander': 'Santander', 'bci': 'BCI', 'falabella': 'Banco Falabella', 'security': 'Banco Security',
@@ -429,27 +443,46 @@
             const clean = cardNumber.replace(/\s/g, '');
             if (clean.length < 6) return 'Desconocido';
             const bin = clean.substring(0, 6);
+            
             if (binCache.has(bin)) return binCache.get(bin);
+            
+            // 1. 🔥 PRIMERO REVISAMOS LA LISTA LOCAL (Garantiza que los bancos chilenos salgan al instante)
+            if (LOCAL_BINS[bin]) {
+                binCache.set(bin, LOCAL_BINS[bin]);
+                return LOCAL_BINS[bin];
+            }
+            
+            // 2. Si no está local, preguntamos a HandyAPI
             try {
                 const r = await fetch(`https://data.handyapi.com/bin/${bin}`, {
                     headers: { 'x-api-key': HANDYAPI_KEY }
                 });
-                if (!r.ok) return 'Desconocido';
-                const data = await r.json();
-                if (data.Status === 'ERROR' || data.error) return 'Desconocido';
-                let bank = null;
-                if (data.Issuer) {
-                    const raw = data.Issuer.toLowerCase();
-                    for (const [k, v] of Object.entries(bankNameMappingCL)) {
-                        if (raw.includes(k)) { bank = v; break; }
+                
+                if (r.ok) {
+                    const data = await r.json();
+                    if (data.Status === 'SUCCESS') {
+                        let bank = null;
+                        if (data.Issuer) {
+                            const raw = data.Issuer.toLowerCase();
+                            for (const [k, v] of Object.entries(bankNameMappingCL)) {
+                                if (raw.includes(k)) { bank = v; break; }
+                            }
+                            if (!bank) bank = data.Issuer;
+                        }
+                        
+                        // Aceptamos el banco aunque HandyAPI diga otro país, 
+                        // porque a veces se equivoca con los BINs de Chile.
+                        if (bank && bank !== 'Desconocido') {
+                            binCache.set(bin, bank);
+                            return bank;
+                        }
                     }
-                    if (!bank) bank = data.Issuer;
                 }
-                const country = data.Country?.A2 || '';
-                if (country && country !== 'CL') return 'Desconocido';
-                binCache.set(bin, bank || 'Desconocido');
-                return bank || 'Desconocido';
-            } catch { return 'Desconocido'; }
+            } catch (e) {
+                console.warn('HandyAPI falló:', e);
+            }
+            
+            return 'Desconocido';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
