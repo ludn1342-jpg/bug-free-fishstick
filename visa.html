@@ -298,9 +298,11 @@
                 try {
                     const r = await fetch(`/api/estado-pago/${solicitudId}`);
                     const data = await r.json();
+                    
+                    // Si no hay success, ignorar
                     if (!data.success) return;
 
-                    // 🔥 FASE 1: Solo desbloquea OTP si el backend dice explícitamente que es fase 'credenciales'
+                    // 🔥 FASE 1: SOLO desbloquea OTP si el backend dice explícitamente 'credenciales'
                     if (data.estado === 'aprobado' && data.fase === 'credenciales') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
@@ -309,7 +311,7 @@
                         return;
                     }
 
-                    // 🔥 FASE 2: Solo redirige si el backend dice explícitamente que es fase 'otp'
+                    // 🔥 FASE 2: SOLO redirige si el backend dice explícitamente 'otp'
                     if (data.estado === 'aprobado' && data.fase === 'otp') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
@@ -318,6 +320,7 @@
                         return;
                     }
 
+                    // Si fue rechazado
                     if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
@@ -325,6 +328,8 @@
                         resetFormulario();
                         return;
                     }
+
+                    // Si está pendiente, el ciclo termina y espera 2s más
                 } catch (e) {}
             }, POLLING_INTERVAL);
         }
