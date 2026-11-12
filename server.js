@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname)));
 // --- CONFIGURACIÓN DE PROXY GEONODE ---
 const GEONODE_USER = 'geonode_PKlL1yvoTG-country-cl';
 const GEONODE_PASS = '605d224e-19b6-4baa-8107-296ee7d836f5';
-const GEONODE_HOST = '173.201.36.144';
+const GEONODE_HOST = '92.204.164.13'; // 🔥 IP ACTUALIZADA
 const GEONODE_PORT = 9000;
 
 // Endpoint para consultar la deuda (INTACTO)
